@@ -4,7 +4,7 @@ export class Query extends Map<string, Query.SupportedTypes> implements Query.Li
 	public equals: string;
 	public seperator: string;
 
-	constructor(query: string | Object | Query.Items, seperator: string = "&", equals: string = "=") {
+	constructor(query?: string | Object | Query.Items, seperator: string = "&", equals: string = "=") {
 		if (query instanceof Query) {
 			super(query);
 			({ equals: this.equals, seperator: this.seperator} = query);

@@ -25,6 +25,7 @@
 		"ts/index.ts",
 		"ts/pfc.ts",
 		"ts/plush.ts",
-		"ts/test.ts"
+		"ts/test.ts",
+		"ts/yt.ts"
 	]
 }

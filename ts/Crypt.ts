@@ -13,6 +13,7 @@ const encryptedString: string = "[ENCRYPTED]";
 const googleFile: Path = secretsDirectory.join(".secrets_google");
 const keyFile: Path = new Path("/home/corpubro/.ssh/id_rsa");
 const secretsAllFile: Path = secretsDirectory.join(".secrets_all.json");
+const youTubeSubscriberFile: Path = secretsDirectory.join(".secrets_youtubesubscriber");
 
 type Bots = "pfc" | "plush";
 
@@ -20,20 +21,18 @@ interface SecretsAll {
 	Google: SecretsGoogle;
 	pfc: SecretsBot;
 	plush: SecretsBot;
+	YouTubeSubscriber: SecretsYouTubeSubscriber;
 }
 
-export interface SecretsBot {
-	token: string;
-}
-
-interface SecretsBotCollection<T> {
-	[key: string]: T;
-}
+export interface SecretsBot { token: string; }
+interface SecretsBotCollection<T> { [key: string]: T; }
 
 export interface SecretsGoogle {
 	api: string;
 	cx: string;
 }
+
+export interface SecretsYouTubeSubscriber { callbackUrl: string; }
 
 function deleteUnencryptedSecrets(secrets: SecretsAll): SecretsAll {
 	for (const target in secrets)
@@ -46,14 +45,17 @@ function extractBotSecrets(secrets: SecretsAll): SecretsBotCollection<SecretsBot
 	const result: SecretsBotCollection<SecretsBot> = {};
 
 	for (const target in secrets)
-		if (target != "Google")
+		if (target != "Google" && target != "YouTubeSubscriber")
 			Object.assign(result, { [target]: secrets[target] });
 	return result;
 }
 
 export async function getSecrets(target: "Google"): Promise<SecretsGoogle>;
+export async function getSecrets(target: "YouTubeSubscriber"): Promise<SecretsYouTubeSubscriber>;
 export async function getSecrets(target: Bots): Promise<SecretsBot>;
-export async function getSecrets(target: "Google" | Bots): Promise<SecretsGoogle | SecretsBot> { return JSON.parse(await getSecretsText((target === "Google") ? googleFile : botFiles[target])); }
+export async function getSecrets(target: "Google" | "YouTubeSubscriber" | Bots): Promise<SecretsGoogle | SecretsYouTubeSubscriber | SecretsBot> {
+	return JSON.parse(await getSecretsText((target === "Google") ? googleFile : (target === "YouTubeSubscriber") ? youTubeSubscriberFile : botFiles[target]));
+}
 
 async function getSecretsText(filePath: Path): Promise<string> {
 	const file: Fs.ReadStream = Fs.createReadStream(filePath.toString(), { encoding: "binary", autoClose: true });
@@ -93,7 +95,10 @@ function write(secret: string, key: string, destination: Path): void {
 
 function writeBots(secrets: SecretsBotCollection<SecretsBot>, key: string, destinations: SecretsBotCollection<Path> = botFiles): void {
 	for (const bot in secrets)
-		writeJson<SecretsBot>(secrets[bot], key, destinations[bot]);
+		if (secrets[bot].token === encryptedString)
+			return;
+		else
+			writeJson<SecretsBot>(secrets[bot], key, destinations[bot]);
 }
 
 async function writeCleanSecretsAll(secrets: SecretsAll, file: Path = secretsAllFile): Promise<boolean> {
@@ -106,20 +111,38 @@ async function writeCleanSecretsAll(secrets: SecretsAll, file: Path = secretsAll
 	});
 }
 
-function writeGoogle(secret: SecretsGoogle, key: string, destination: Path = googleFile): void { writeJson<SecretsGoogle>(secret, key, destination); }
+async function writeGoogle(secret: SecretsGoogle, key: string, destination: Path = googleFile) {
+	if (secret.api === encryptedString || secret.cx === encryptedString)
+		if (secret.api === secret.cx)
+			return;
+		else {
+			const currentSecret: SecretsGoogle = await getSecrets("Google");
+
+			if (secret.api === encryptedString)
+				secret.api = currentSecret.api;
+			else
+				secret.cx = currentSecret.cx;
+		}
+	writeJson<SecretsGoogle>(secret, key, destination);
+}
+
 function writeJson<T>(secret: T, key: string, destination: Path): void { write(JSON.stringify(secret), key, destination); }
 
-function writeSecretsAll(secrets: SecretsAll, key: string): void {
-	writeGoogle(secrets.Google, key);
+function writeYouTubeSubscriber(secret: SecretsYouTubeSubscriber, key: string, destination: Path = youTubeSubscriberFile): void {
+	if (secret.callbackUrl === encryptedString)
+		return;
+	writeJson<SecretsYouTubeSubscriber>(secret, key, destination);
+}
+
+async function writeSecretsAll(secrets: SecretsAll, key: string) {
+	await writeGoogle(secrets.Google, key);
+	writeYouTubeSubscriber(secrets.YouTubeSubscriber, key);
 	writeBots(extractBotSecrets(secrets), key);
 }
 
 export async function encryptAllSecrets() {
 	const key: string = await readKey();
 	const secrets: SecretsAll = await readSecretsAll();
-
-	if (secrets.Google.api === encryptedString)
-		throw new Error("Secrets have already been encrypted!");
-	writeSecretsAll(secrets, key);
+	await writeSecretsAll(secrets, key);
 	await writeCleanSecretsAll(deleteUnencryptedSecrets(secrets));
 }

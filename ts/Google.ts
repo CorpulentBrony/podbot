@@ -1,11 +1,15 @@
 import { Collection } from "./Collection";
 import * as Crypt from "./Crypt";
-import * as Discord from "discord.js";
 import { GenericApi } from "./GenericApi";
 import { GenericBot } from "./GenericBot";
-import { Path, Query, Url } from "./Url";
 import { Embed, Reactor } from "./Reactor";
-import { RichEmbed } from "./RichEmbed";
+import { Path, Query, Url } from "./Url";
+
+export const GOOGLE_API_BASE_URL: string = "https://www.googleapis.com";
+const GOOGLE_MAPS_BASE_API: string = "https://maps.googleapis.com";
+const GOOGLE_SEARCH_API: string = "/customsearch/v1";
+const GOOGLE_MAPS_TIMEZONE_API: string = "/maps/api/timezone/json";
+
 
 // https://console.developers.google.com/apis/credentials?project=podbot-1487985738290
 
@@ -18,8 +22,10 @@ import { RichEmbed } from "./RichEmbed";
 // https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=PLYwK4VQSqT-v3-7lp-eXaJD62-mrzuaj6&maxResults=50&key=
 export const favIconUrl: Url = new Url("https://www.google.com/images/branding/product/ico/googleg_lodp.ico");
 export const genericQueryUrl: Url = new Url("https://www.google.com/search");
-const url: Url = new Url("https://www.googleapis.com/customsearch/v1");
+const url: Url = new Url(GOOGLE_API_BASE_URL + GOOGLE_SEARCH_API);
 let query: Query;
+
+class GoogleError extends Error {}
 
 export class Search {
 
@@ -29,76 +35,10 @@ export class Timezone {
 
 }
 
-export class YouTube implements Reactor.Command, YouTube.Like {
-	private _embeds: Array<Embed.Options>;
-	public readonly bot: GenericBot;
-	public readonly channel: GenericBot.Command.TextBasedChannel;
+// search functionality, accessible from bot, similar to search on db
+// option to set up query to a playlist to look for new items.  perhaps emit an event that can be consumed elsewhere?
 
-	public get embeds(): Array<Embed.Options> {
-		// if (this._embeds)
-			return this._embeds;
-		// return this._embeds = this.images.reduce<Array<Embed.Options>>((embeds: Array<Embed.Options>, image: Derpibooru.Image): Array<Embed.Options> => {
-		// 	embeds.push({
-		// 		description: image.file_name + " uploaded by " + image.uploader,
-		// 		footer: { icon_url: Derpibooru.favIconUrl.toString(), text: image.tags },
-		// 		image: { url: image.imageUrl },
-		// 		title: image.pageUrl,
-		// 		url: image.pageUrl }
-		// 	);
-		// 	return embeds;
-		// }, new Array<Embed.Options>());
-	}
-}
 
-export namespace YouTube {
-	export interface Constructor {
-		prototype: Like;
-	}
-
-	export interface Like {
-		constructor: Constructor;
-	}
-
-	export namespace Response {
-		export interface Items {
-			playlistId: string;
-			position: number;
-			resourceId: Resource;
-			snippet?: Snippet;
-		}
-
-		export interface PageInfo {
-			totalResults: number;
-			resultsPerPage: number;
-		}
-
-		export interface PlaylistItems {
-			items?: Array<Items>;
-			pageInfo?: PageInfo;
-		}
-
-		export interface Resource { videoId: string; }
-
-		export interface Snippet {
-			description: string;
-			thumbnails: Thumbnails;
-			title: string;
-			publishedAt: string;
-		}
-
-		export interface Thumbnail {
-			height: number;
-			url: string;
-			width: number;
-		}
-
-		export interface Thumbnails {
-			default: Thumbnail;
-			medium?: Thumbnail;
-			high?: Thumbnail;
-		}
-	}
-}
 
 
 

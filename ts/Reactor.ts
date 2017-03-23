@@ -73,6 +73,9 @@ export namespace Reactor {
 		bot: GenericBot;
 		channel: GenericBot.Command.TextBasedChannel;
 		embeds: Array<RichEmbed.Options>;
+		parsedCommand: GenericBot.Command.Parser.ParsedCommand;
+
+		send(): Promise<RichEmbed>;
 	}
 
 	export interface Constructor {

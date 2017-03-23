@@ -19,6 +19,9 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 		}, options));
 		this.channel = parsedCommand.channel;
 
+		if (options.video)
+			this["video"] = options.video;
+
 		if (Array.isArray(embedsOrOptions)) 
 			[this.embeds, this.index] = [embedsOrOptions, 1];
 		Object.defineProperty(this, "channel", { enumerable: false });
@@ -38,7 +41,11 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 		return this.setOptions(this.embeds[this.index]);
 	}
 
-	public async send(): Promise<Discord.Message> { return this.message = await this.channel.sendEmbed(this, undefined, { split: true }); }
+	public async send(): Promise<Discord.Message> {
+		if (this["video"] && this["video"].url)
+			return this.message = <Discord.Message>await this.channel.send(this["video"].url);
+		return this.message = await this.channel.sendEmbed(this, undefined, { split: true });
+	}
 
 	private setOptions(options: RichEmbed.Options = {}): this {
 		for (const option in options)
@@ -47,7 +54,11 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 		return this;
 	}
 
-	public async update(): Promise<Discord.Message> { return this.message = await this.message.edit(undefined, { embed: this }); }
+	public async update(): Promise<Discord.Message> {
+		if (this["video"] && this["video"].url)
+			return this.message = await this.message.edit(this["video"].url);
+		return this.message = await this.message.edit(undefined, { embed: this });
+	}
 }
 
 export namespace RichEmbed {

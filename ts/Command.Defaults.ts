@@ -7,6 +7,7 @@ import { GenericBot } from "./GenericBot";
 import * as Google from "./Google";
 import { Query } from "./Url";
 import { RichEmbed as NewRichEmbed } from "./RichEmbed";
+import { YouTube } from "./YouTube";
 
 // change RichEmbed here locally to use the new RichEmbed
 // modify all below to follow example of db (4chan, google)
@@ -154,5 +155,20 @@ export namespace Defaults {
 			footer: "\u{1f199}",
 			title: parsedCommand.bot.name + " Uptime"
 		});
+	}
+
+	export async function yt(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
+		const command: YouTube = new YouTube(parsedCommand);
+
+		try { await command.search(); }
+		catch (err) {
+			if (err instanceof YouTube.Error)
+				return say(parsedCommand, err.message);
+			else
+				throw err;
+		}
+		const embed: NewRichEmbed = await command.send();
+		parsedCommand.bot.reactor.add(embed);
+		return embed.message;
 	}
 }

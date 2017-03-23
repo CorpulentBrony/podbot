@@ -2,6 +2,7 @@ import * as Http from "http";
 import * as Https from "https";
 import * as JSONStream from "JSONStream";
 import { Path, Query, Url } from "./Url";
+import * as URL from "url";
 
 export class GenericApi {
 	private agent: Https.Agent;
@@ -23,6 +24,9 @@ export class GenericApi {
 			const options: Https.RequestOptions = this.buildRequestOptions(method, query);
 			Https.request(options, (result: Http.IncomingMessage): void => {
 				let error: Error;
+
+				if (result.statusCode === 304)
+					resolve.call(this, undefined);
 
 				if (result.statusCode !== 200)
 					error = new Error("HTTPS request failed.  Status code: " + result.statusCode.toString());
@@ -74,8 +78,8 @@ export namespace GenericApi {
 	}
 
 	export namespace Get {
-		export async function json<T>(url: Url, query?: Query, method: Method = "GET"): Promise<T> {
-			const request: GenericApi = new GenericApi(url, true);
+		export async function json<T>(url: Url, query?: Query, headers?: GenericApi.Headers, method: Method = "GET"): Promise<T> {
+			const request: GenericApi = new GenericApi(url, true, headers);
 			return request.getJson<T>(query);
 		}
 	}

@@ -55,8 +55,8 @@ export class Derpibooru implements Derpibooru.Like, Reactor.Command {
 			if (typeof image.id === "undefined")
 				console.log("found undefined image!!!\n", images);
 			return Object.defineProperties(image, {
-				"imageUrl": { get: function(): string { return Derpibooru.Response.formatImageUrl(this); } },
-				"pageUrl": { get: function(): string { return Derpibooru.Response.formatImagePageUrl(this); } }
+				imageUrl: { get: function(): string { return Derpibooru.Response.formatImageUrl(this); } },
+				pageUrl: { get: function(): string { return Derpibooru.Response.formatImagePageUrl(this); } }
 			});
 		});
 	}
