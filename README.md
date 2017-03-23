@@ -18,7 +18,7 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 	<code>4chan [ random | <var>search</var> ]</code>
 	<dd>Searches the catalog of a <a href="https://www.4chan.org/" rel="external">4chan</a> board; by default this is <a href="http://boards.4chan.org/mlp/" rel="external">/mlp/</a> (configurable in <code><a href="ts/FourChan.ts">FourChan.ts</a></code>).  If no argument or <code>random</code> given, then a random thread is returned; otherwise, the first thread that matches the <code><var>search</var></code> argument is returned along with a random image from that thread.</dd>
 	<code>db [ random | <var>search</var> ]</code>
-	<dd>Searches <a href="https://www.derpibooru.org/" rel="external">Derpibooru</a>.  If no argument or <code>random</code> given, then a random image is returned; otherwise, a random image based on the <code><var>search</var></code> argument is returned.  The best searches on Derpibooru are tag searches and commas (<code>,</code>) can be used to &quot;and&quot; tags together.</dd>
+	<dd>Searches <a href="https://www.derpibooru.org/" rel="external">Derpibooru</a>.  If no argument or <code>random</code> given, then a random image is returned; otherwise, a random image based on the <code><var>search</var></code> argument is returned.  The best searches on Derpibooru are tag searches and commas (<code>,</code>) can be used to &quot;and&quot; tags together.  Implements <a href="ts/Reactor.ts">Reactor</a> allowing end user to scroll through results.</dd>
 	<code>google <var>search</var></code>
 	<dd>Searches <a href="https://www.google.com/" rel="external">Google</a> and returns the top three results based on the <code><var>search</var></code> argument.</dd>
 	<code>ping</code>
@@ -29,14 +29,21 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 	<dd>Will force the bot to say <var>message</var> in the current channel.  This is exposed primarily for testing and likely won't stay that way for long.</dd>
 	<code>uptime</code>
 	<dd>Will show the current uptime for the bot according to the discord.js API.  This command can only be used either via DM or in a channel which contains the word &quot;bot&quot; in its name.</dd>
+	<code>yt <var>search</var></code>
+	<dd>Searches <a href="https://www.youtube.com" rel="external">YouTube</a> and returns videos matching the <code><var>search</var></code> argument.  Implements <a href="ts/Reactor.ts">Reactor</a> allowing end user to scroll through results.</dd>
 </dl>
 
 ### Current custom commands for PFC ([`pfc.ts`](ts/pfc.ts))
 
 <dl>
+	<code>pfc [ last | live ]</code>
+	<dd>If run with <code>last</code> then it will post the last video uploaded to the <a href="http://www.youtube.com/c/PFCpodcast" rel="external">PFC YouTube channel</a>.  If the parameter is <code>live</code> then it will link the <a href="http://www.youtube.com/c/PFCpodcast/live" rel="external">PFC live page</a> which should show current livestreams that may be occuring.</dd>
 	<code>topic <var>topic</var></code>
 	<dd>This command will reformat and re-state <var>topic</var>, pin that new message to the active channel, and remove the original message.  This is intended to making pinning topics to the <code>#podcast</code> channel on PFC easier and, as such, will only work if the channel's name is either <code>#podcast</code> or <code>#bot-fuckery</code>.</dd>
 </dl>
+<ul>
+	<li>The bot will query the PFC YouTube channel once every 30 seconds looking for a newly uploaded video.  If one is found, then it will be posted to the #pfc text channel.</li>
+</ul>
 
 ### Current custom commands for Plush Degenerates ([`plush.ts`](ts/plush.ts))
 
