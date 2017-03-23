@@ -19,9 +19,31 @@ const GOOGLE_MAPS_TIMEZONE_API: string = "/maps/api/timezone/json";
 
 class GoogleError extends Error {}
 
-export class Google {}
-
 export namespace Google {
+	export interface Secrets {
+		cx: string;
+		key: string;
+	}
+
+	export class Error extends GoogleError {}
+
+	let secrets: Secrets;
+
+	export async function getCx(): Promise<string> { return (await getSecrets()).cx; }
+	export async function getKey(): Promise<string> { return (await getSecrets()).key; }
+
+	export async function getSecrets(): Promise<Secrets> {
+		if (secrets)
+			return secrets;
+		return secrets = translateSecrets(await Crypt.getSecrets("Google"));
+	}
+
+	function translateSecrets(secrets: Crypt.SecretsGoogle): Secrets {
+		const result: Secrets & Crypt.SecretsGoogle = Object.defineProperty(secrets, "key", Object.getOwnPropertyDescriptor(secrets, "api"));
+		delete result.api;
+		return result;
+	}
+
 	namespace Paths {
 		export const favIcon: Path = new Path(GOOGLE_FAVICON_PATH);
 		export const search: Path = new Path(GOOGLE_SEARCH_PATH);
@@ -75,13 +97,8 @@ let query: Query;
 
 
 
-// this should be standardized into youtube namespace, then modify youtube to leverage it from google
-async function getQuery() {
-	const secrets: Crypt.SecretsGoogle = await Crypt.getSecrets("Google");
-	Object.defineProperty(secrets, "key", Object.getOwnPropertyDescriptor(secrets, "api"));
-	delete secrets.api;
-	query = new Query(secrets);
-}
+// this should be standardized into google namespace, then modify youtube to leverage it from google
+async function getQuery() { query = new Query(await Google.getSecrets()); }
 
 getQuery().catch(console.error);
 

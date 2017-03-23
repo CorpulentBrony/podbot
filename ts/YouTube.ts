@@ -11,8 +11,6 @@ const YOUTUBE_API_ACTIVITIES_PATH: string = "activities";
 const YOUTUBE_API_BASE_PATH: string = "/youtube/v3";
 const YOUTUBE_API_SEARCH_PATH: string = "search";
 
-class YouTubeError extends Error {}
-
 export class YouTube implements Reactor.Command, YouTube.Like {
 	private _embeds: Array<Embed.Options>;
 	private _videos: Array<YouTube.Response.ItemUrls>;
@@ -62,7 +60,7 @@ export class YouTube implements Reactor.Command, YouTube.Like {
 		}));
 	}
 
-	public async configureQuery(query: string) { this.query.set("maxResults", 50).set("part", "snippet").set("q", query).set("safeSearch", "none").set("type", "video").set("key", await YouTube.getKey()); }
+	public async configureQuery(query: string) { this.query.set("maxResults", 50).set("part", "snippet").set("q", query).set("safeSearch", "none").set("type", "video").set("key", await Google.getKey()); }
 
 	public async search(query: string = this.userInput) {
 		if (!query || query === "")
@@ -99,16 +97,7 @@ export namespace YouTube {
 		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Like;
 	};
 
-	export class Error extends YouTubeError {}
-
-	let key: string;
-
-	export async function getKey(): Promise<string> {
-		if (key)
-			return key;
-		const result: Crypt.SecretsGoogle = await Crypt.getSecrets("Google");
-		return key = result.api;
-	}
+	export class Error extends Google.Error {}
 
 	export namespace Paths {
 		export const apiBase: Path = new Path(YOUTUBE_API_BASE_PATH);
@@ -242,7 +231,7 @@ class YouTubeChannelMonitor extends EventEmitter implements YouTubeChannelMonito
 		});
 	}
 
-	public async configureQuery() { this.query.set("maxResults", 10).set("part", "contentDetails").set("channelId", this.channelId).set("key", await YouTube.getKey()); }
+	public async configureQuery() { this.query.set("maxResults", 10).set("part", "contentDetails").set("channelId", this.channelId).set("key", await Google.getKey()); }
 
 	public async refresh() {
 		try {
@@ -294,7 +283,7 @@ namespace YouTubeChannelMonitor {
 		new(channelId: string): Like;
 	};
 
-	export class Error extends YouTubeError {}
+	export class Error extends YouTube.Error {}
 
 	namespace Paths {
 		export const api: Path = YouTube.Paths.apiBase.join(YOUTUBE_API_ACTIVITIES_PATH);
