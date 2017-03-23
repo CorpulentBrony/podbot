@@ -2,7 +2,7 @@ import * as Crypt from "./Crypt";
 import * as EventEmitter from "events";
 import { GenericApi } from "./GenericApi";
 import { GenericBot } from "./GenericBot";
-import * as Google from "./Google";
+import { Google } from "./Google";
 import { Embed, Reactor } from "./Reactor";
 import { Path, Query, Url } from "./Url";
 
@@ -87,7 +87,7 @@ export namespace YouTube {
 	export interface Like {
 		readonly query: Query;
 		readonly userInput: string;
-		videos: Array<YouTube.Response.ItemUrls>;
+		videos: Array<Response.ItemUrls>;
 
 		configureQuery(query: string);
 		search(query?: string);
@@ -133,7 +133,7 @@ export namespace YouTube {
 		export namespace Item {
 			export function getChannelUrl(item: Item): Url {
 				if (item.snippet && item.snippet.channelId)
-					return YouTube.Urls.base.setPathname(YouTube.Paths.channel.join(item.snippet.channelId));
+					return Urls.base.setPathname(Paths.channel.join(item.snippet.channelId));
 				return undefined;
 			}
 
@@ -197,7 +197,7 @@ export namespace YouTube {
 	}
 
 	export namespace Urls {
-		export const apiBase: Url = new Url(Google.GOOGLE_API_BASE_URL);
+		export const apiBase: Url = new Url(Google.Urls.api);
 		export const api: Url = apiBase.setPathname(Paths.api);
 		export const base: Url = new Url(YOUTUBE_BASE_URL);
 		export const favicon: Url = base.setPathname(Paths.favicon);
@@ -296,7 +296,7 @@ namespace YouTubeChannelMonitor {
 
 	export class Error extends YouTubeError {}
 
-	export namespace Paths {
+	namespace Paths {
 		export const api: Path = YouTube.Paths.apiBase.join(YOUTUBE_API_ACTIVITIES_PATH);
 	}
 

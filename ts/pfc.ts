@@ -68,7 +68,7 @@ channelMonitor.on("error", (err: Error): void => console.error("Error received f
 channelMonitor.start();
 
 async function onNewVideo(video: YouTube.Response.ItemUrls) {
-	let channels: Discord.Collection<string, Discord.TextChannel> = bot.client.guilds.first().channels.filter((channel: Discord.GuildChannel): boolean => channel.type === "text");
+	let channels: Discord.Collection<string, Discord.TextChannel> = <Discord.Collection<string, Discord.TextChannel>>bot.client.guilds.first().channels.filter((channel: Discord.GuildChannel): boolean => channel.type === "text");
 	return channels.find("name", "pfc").send(video.videoUrl.toString());
 }
 
