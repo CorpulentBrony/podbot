@@ -4,7 +4,6 @@ import { GenericBot } from "./GenericBot";
 import { Google } from "./Google";
 import { RichEmbed as Embed } from "./RichEmbed";
 import { Path, Query, Url } from "./Url";
-import { ChannelMonitor as YouTubeChannelMonitor } from "./YouTube/ChannelMonitor";
 
 const YOUTUBE_BASE_URL: string = "https://www.youtube.com";
 const YOUTUBE_API_BASE_PATH: string = "/youtube/v3";
@@ -65,8 +64,6 @@ export class YouTube extends Embeddable<YouTube.Response.ItemUrls> implements Yo
 }
 
 export namespace YouTube {
-	export import ChannelMonitor = YouTubeChannelMonitor;
-	
 	export interface Like {
 		search(query?: string);
 	} export declare const Like: {
@@ -170,4 +167,10 @@ export namespace YouTube {
 		export const favicon: Url = base.setPathname(Paths.favicon);
 		export const watch: Url = base.setPathname(Paths.watch);
 	}
+}
+
+import { ChannelMonitor as YouTubeChannelMonitor } from "./YouTube/ChannelMonitor";
+
+export namespace YouTube {
+	export import ChannelMonitor = YouTubeChannelMonitor;
 }

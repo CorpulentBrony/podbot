@@ -6,7 +6,7 @@ import { YouTube } from "../YouTube";
 
 const YOUTUBE_API_ACTIVITIES_PATH: string = "activities";
 
-export class ChannelMonitor extends EventEmitter implements YouTube.ChannelMonitor.Like {
+export class ChannelMonitor extends EventEmitter implements ChannelMonitor.Like {
 	private _lastVideo: YouTube.Response.ItemUrls;
 	public etag: string;
 	public frequencySeconds: number;
@@ -49,11 +49,11 @@ export class ChannelMonitor extends EventEmitter implements YouTube.ChannelMonit
 		try {
 			await this.configureQuery();
 			const headers: GenericApi.Headers = this.etag ? { "if-none-match": this.etag } : {};
-			const result: YouTube.Response.Result = await GenericApi.Get.json<YouTube.Response.Result>(YouTube.ChannelMonitor.Urls.api, this.query, headers);
+			const result: YouTube.Response.Result = await GenericApi.Get.json<YouTube.Response.Result>(ChannelMonitor.Urls.api, this.query, headers);
 			super.emit("response", result);
 
 			if (result && result.items && result.items.length > 0) {
-				const lastVideo: YouTube.Response.Item = YouTube.ChannelMonitor.findMostRecentUpload(result.items);
+				const lastVideo: YouTube.Response.Item = ChannelMonitor.findMostRecentUpload(result.items);
 				if (lastVideo && lastVideo.contentDetails && lastVideo.contentDetails.upload && lastVideo.contentDetails.upload.videoId && (!this.lastVideo || this.lastVideo.contentDetails && this.lastVideo.contentDetails.upload && this.lastVideo.contentDetails.upload.videoId && lastVideo.contentDetails.upload.videoId !== this.lastVideo.contentDetails.upload.videoId)) {
 					this.lastVideo = lastVideo;
 

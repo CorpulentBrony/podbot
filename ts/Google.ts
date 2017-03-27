@@ -1,6 +1,4 @@
 import * as Crypt from "./Crypt";
-import { Search as GoogleSearch } from "./Google/Search";
-import { Timezone as GoogleTimezone } from "./Google/Timezone";
 import { Path, Url } from "./Url";
 
 const GOOGLE_API_BASE_URL: string = "https://www.googleapis.com";
@@ -14,9 +12,6 @@ const GOOGLE_SEARCH_PATH: string = "/search";
 class GoogleError extends Error {}
 
 export namespace Google {
-	export import Search = GoogleSearch;
-	export import Timezone = GoogleTimezone;
-
 	export interface Secrets {
 		cx: string;
 		key: string;
@@ -54,4 +49,12 @@ export namespace Google {
 		export const favIcon: Url = base.setPathname(Paths.favIcon);
 		export const search: Url = base.setPathname(Paths.search);
 	}
+}
+
+import { Search as GoogleSearch } from "./Google/Search";
+import { Timezone as GoogleTimezone } from "./Google/Timezone";
+
+export namespace Google {
+	export import Search = GoogleSearch;
+	export import Timezone = GoogleTimezone;
 }
