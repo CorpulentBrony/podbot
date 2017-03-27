@@ -19,7 +19,7 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 
 ## What can it do?
 
-### Current global commands ([`Command.Default.ts`](ts/Command.Default.ts))
+### Current global commands (implemented in [`Command/Defaults.ts`](ts/Command/Defaults.ts))
 
 <dl>
 	<code>4chan [ random | <var>search</var> ]</code>
@@ -40,7 +40,7 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 	<dd>Searches <a href="https://www.youtube.com" rel="external">YouTube</a> and returns videos matching the <code><var>search</var></code> argument.  Implements <a href="ts/Embeddable.ts">Embeddable</a> allowing end user to scroll through results.</dd>
 </dl>
 
-### Current custom commands for PFC ([`pfc.ts`](ts/pfc.ts))
+### Current custom commands and features for PFC (implemented in [`pfc.ts`](ts/pfc.ts))
 
 <dl>
 	<code>pfc [ last | live ]</code>
@@ -48,14 +48,14 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 	<code>topic <var>topic</var></code>
 	<dd>This command will reformat and re-state <var>topic</var>, pin that new message to the active channel, and remove the original message.  This is intended to making pinning topics to the <code>#podcast</code> channel on PFC easier and, as such, will only work if the channel's name is either <code>#podcast</code> or <code>#bot-fuckery</code>.</dd>
 </dl>
-#### Other features
+#### Features
 <ul>
 	<li>The bot will query the PFC YouTube channel once every 30 seconds looking for a newly uploaded video.  If one is found, then it will be posted to the #pfc text channel.</li>
 	<li>When a new user joins the guild, the bot will automatically assign them a role.</li>
 	<li>If a user in the specified group uploads a picture, the bot will automatically react with three specified reaction images (this was done as an inside joke).</li>
 </ul>
 
-### Current custom commands for Plush Degenerates ([`plush.ts`](ts/plush.ts))
+### Current custom commands for Plush Degenerates (implemented in [`plush.ts`](ts/plush.ts))
 
 <dl>
 	<code>thread</code>
@@ -70,12 +70,11 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 
 ### To-do List
 
-- [ ] Add `images` command to search Google images (exact same API implementation as current [Google.Search](ts/Google.ts), only with `searchType=image` added as a query parameter)
-- [ ] Modify the [Google.Search](ts/Google.ts) API calls (and any other Google APIs that support it) to make use of the `files=` parameter in the request to reduce unnecessary data (https://developers.google.com/custom-search/json-api/v1/performance)
+- [ ] Add `images` command to search Google images (exact same API implementation as current [Google.Search](ts/Google/Search.ts), only with `searchType=image` added as a query parameter)
+- [ ] Modify the [Google.Search](ts/Google/Search.ts) API calls (and any other Google APIs that support it) to make use of the `files=` parameter in the request to reduce unnecessary data (https://developers.google.com/custom-search/json-api/v1/performance)
 - [ ] Change all commands that fit the [Embeddable](ts/Embeddable.ts) profile to make use of the new abstract class; current candidates in process:
   - [ ] `4chan`
-- [ ] Eliminate use of old `RichEmbed` class defined within [Command.Defaults](ts/Command.Defaults.ts) in favor of my actual [RichEmbed](ts/RichEmbed.ts) implementation
-- [ ] Fix file layouts; move subclasses (i.e., [Google.Search](ts/Google.ts), [Google.Timezone](ts/Google.ts), etc.) into their own subdirectories; create and rename files that should already be in their own subdirectory (i.e., [Command.Defaults](ts/Command.Defaults.ts) and [Command.Parser](ts/Command.Parser.ts))
+- [ ] Eliminate use of old `RichEmbed` class defined within [Command.Defaults](ts/Command/Defaults.ts) in favor of my actual [RichEmbed](ts/RichEmbed.ts) implementation
 - [ ] Do some sort of `stats` command, or something that queries mongo and returns the person who issues the most commands or the most used commands or both
 - [ ] Maybe a `weather` command?
 - [ ] Add support in [GenericApi](ts/GenericApi.ts) for sending/receiving gzip encoded http requests (http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression)
