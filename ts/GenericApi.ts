@@ -4,9 +4,6 @@ import * as JSONStream from "JSONStream";
 import { Path, Query, Url } from "./Url";
 import * as URL from "url";
 
-// add support for sending/receiving http requests using gzip encoding
-// http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression
-
 export class GenericApi {
 	private agent: Https.Agent;
 	private headers: { [key: string]: string };

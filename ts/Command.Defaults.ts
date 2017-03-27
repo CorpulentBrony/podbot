@@ -9,14 +9,6 @@ import { Query } from "./Url";
 import { RichEmbed as NewRichEmbed } from "./RichEmbed";
 import { YouTube } from "./YouTube";
 
-// change RichEmbed here locally to use the new RichEmbed
-// modify all below to follow example of db (4chan, google)
-// do a command that shows most popular user or something from mongo
-// youtube search command
-// something that checks youtube for new videos by channel (ie, PFC) and then posts them to server?
-// weather command?
-// fix regind command??????
-
 export class Defaults {
 	public static async ["4chan"](parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> { return Defaults.fourChan(parsedCommand); }
 }
@@ -110,28 +102,6 @@ export namespace Defaults {
 		const embed: NewRichEmbed = await command.send();
 		parsedCommand.bot.reactor.add(embed);
 		return embed.message;
-		// const results: Google.Search.Response = await Google.search(parsedCommand.args);
-		// const message: RichEmbed = new RichEmbed({
-		// 	author: parsedCommand.requester, 
-		// 	description: (results.items) ? parsedCommand.args : "Your search - " + parsedCommand.args + " - did not match any documents.",
-		// 	footer: "Found " + results.searchInformation.formattedTotalResults + " results in " + results.searchInformation.formattedSearchTime + " seconds.",
-		// 	footerImageUrl: Google.favIconUrl.toString(),
-		// 	title: "Google Search Results",
-		// 	url: Google.genericQueryUrl.setQuery(new Query({ q: parsedCommand.args })).toString()
-		// });
-
-		// if (results.items)
-		// 	for (let i: number = 0; i < 3; i++) {
-		// 		message.addField(results.items[i].title, results.items[i].link + "\n" + results.items[i].snippet);
-
-		// 		if (!message.thumbnail)
-		// 			if (results.items[i].pagemap)
-		// 				if (results.items[i].pagemap.cse_thumbnail && results.items[i].pagemap.cse_thumbnail[0].src)
-		// 					message.setThumbnail(results.items[i].pagemap.cse_thumbnail[0].src);
-		// 				else if (results.items[i].pagemap.cse_image && results.items[i].pagemap.cse_image[0].src)
-		// 					message.setThumbnail(results.items[i].pagemap.cse_image[0].src);
-		// 	}
-		// return parsedCommand.channel.sendEmbed(message, undefined, { split: true });
 	}
 
 	function isBotOrDmChannel(channel: GenericBot.Command.TextBasedChannel): boolean { return channel instanceof Discord.DMChannel || channel instanceof Discord.GroupDMChannel || channel instanceof Discord.TextChannel && /bot/gi.test(channel.name); }

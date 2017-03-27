@@ -16,10 +16,6 @@ const GOOGLE_MAPS_TIMEZONE_API: string = "/maps/api/timezone/json";
 
 // https://console.developers.google.com/apis/credentials?project=podbot-1487985738290
 
-// maybe this, the TZ, the derpibooru, and youtube search classes should be children of a common parent...they're sharing a lot of code!
-// modify this (and other api calls to google if possible) to only bring back the needed fields using files= parameter in request https://developers.google.com/custom-search/json-api/v1/performance 
-// implement google image search (uses same exactl api as search but with searchType=image)
-
 class GoogleError extends Error {}
 
 export namespace Google {
