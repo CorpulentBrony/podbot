@@ -1,7 +1,7 @@
 import { Collection } from "./Collection";
 import { GenericApi } from "./GenericApi";
 import { GenericBot } from "./GenericBot";
-import { Embed, Reactor } from "./Reactor";
+import { RichEmbed as Embed } from "./RichEmbed";
 import { Path, Query, Url } from "./Url";
 
 export abstract class Embeddable<T> implements Embeddable.Like<T> {

@@ -1,11 +1,9 @@
+import { Channel } from "./Reactor/Channel";
 import { Collection } from "./Collection";
 import * as Discord from "discord.js";
 import { GenericBot } from "./GenericBot";
+import { Reactions } from "./Reactor/Reactions";
 import { RichEmbed } from "./RichEmbed";
-
-// seperate this out, does RichEmbed belong in here?  maybe just as Embed? 
-// more logical structure?
-// finish constructor and like interfaces
 
 export class Reactor implements Reactor.Like {
 	public readonly bot: GenericBot;
@@ -94,112 +92,3 @@ export namespace Reactor {
 		onMessageReactionRemove(reaction: Discord.MessageReaction, user?: Discord.User): void;
 	}
 }
-
-class Channel implements Channel.Like {
-	public readonly channelId: string;
-	public readonly reactions: Collection<string, Reactions>;
-	public readonly reactor: Reactor;
-
-	constructor(channelId: string, reactor: Reactor) {
-		[this.channelId, this.reactions, this.reactor] = [channelId, new Collection<string, Reactions>(), reactor];
-		Object.defineProperty(this, "reactor", { enumerable: false });
-	}
-
-	public clearReactionDestructor(messageId: string): void { this.reactions.get(messageId).clearDestruct(); }
-
-	public delete(messageId: string): boolean {
-		this.clearReactionDestructor(messageId);
-		return this.reactions.delete(messageId);
-	}
-
-	public get(messageId: string): Reactions { return this.reactions.get(messageId); }
-	public has(messageId: string): boolean { return this.reactions.has(messageId); }
-
-	private reactionDestructor: (key: string) => Promise<void> = async (key: string): Promise<void> => {
-		await this.reactions.get(key).clear();
-		await this.reactions.delete(key);
-	}
-
-	public set(embed: RichEmbed): this {
-		const key: string = embed.message.id;
-		this.reactions.set(key, new Reactions(embed, this)).get(key).add().catch(console.error);
-		this.setReactionDestructor(key);
-		return this;
-	}
-
-	public setReactionDestructor(key: string): void { this.reactions.get(key).timer = this.reactor.bot.client.setTimeout((): Promise<void> => this.reactionDestructor(key).catch(console.error), Channel.messageTtlMinutes * 60 * 1000); }
-}
-
-namespace Channel {
-	export const messageTtlMinutes: number = 5;
-
-	export interface Constructor {
-		prototype: Like;
-	}
-
-	export interface Like {
-		readonly channelId: string;
-		constructor: Constructor;
-		readonly reactions: Collection<string, Reactions>;
-		readonly reactor: Reactor;
-
-		clearReactionDestructor(messageId: string): void;
-		delete(messageId: string): boolean;
-		get(messageId: string): Reactions;
-		has(messageId: string): boolean;
-		set(embed: RichEmbed): this;
-		setReactionDestructor(key: string): void;
-	}
-}
-
-class Reactions implements Reactions.Like {
-	public readonly channel: Channel;
-	public readonly embed: RichEmbed;
-	public reactions: Collection<string, Discord.MessageReaction>;
-	public enabled: boolean;
-	public timer: NodeJS.Timer;
-
-	constructor(embed: RichEmbed, channel: Channel) {
-		[this.channel, this.embed, this.enabled] = [channel, embed, false];
-		Object.defineProperty(this, "channel", { enumerable: false });
-	}
-
-	public async add() {
-		this.reactions = new Collection<string, Discord.MessageReaction>();
-
-		for (const emoticon of Reactions.emoticons)
-			this.reactions.set(emoticon.key, await this.embed.message.react(emoticon.value));
-		this.enabled = true;
-	}
-
-	public async clear() {
-		this.enabled = false;
-		this.embed.message.clearReactions();
-	}
-
-	public clearDestruct(): void { this.channel.reactor.bot.client.clearTimeout(this.timer); }
-}
-
-namespace Reactions {
-	export const emoticons: Collection<string, string> = new Collection<string, string>();
-	emoticons.set("prev", "\u{23ee}").set("next", "\u{23ed}").set("stop", "\u{1f6d1}").set("delete", "\u{1f5d1}");
-
-	export interface Constructor {
-		prototype: Like;
-	}
-
-	export interface Like {
-		readonly channel: Channel;
-		constructor: Constructor;
-		readonly embed: RichEmbed;
-		reactions: Collection<string, Discord.MessageReaction>;
-		enabled: boolean;
-		timer: NodeJS.Timer;
-
-		add(): void;
-		clear(): void;
-		clearDestruct(): void;
-	}
-}
-
-export { RichEmbed as Embed } from "./RichEmbed";
