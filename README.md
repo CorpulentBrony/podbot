@@ -70,27 +70,21 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 
 ### To-do List
 
-<ul>
-	<li>Add <code>images</code> command to search Google images (exact same API implementation as current <a href="ts/Google.ts">Google.Search</a>, only with <code>searchType=image</code> added as a query parameter)</li>
-	<li>Modify the <a href="ts/Google.ts">Google.Search</a> API calls (and any other Google APIs that support it) to make use of the <code>files=</code> parameter in the request to reduce unnecessary data (https://developers.google.com/custom-search/json-api/v1/performance)</li>
-	<li>Change all commands that fit the <a href="ts/Embeddable.ts">Embeddable</a> profile to make use of the new abstract class; current candidates in process:</li>
-	<ul>
-		<li><code>4chan</code></li>
-	</ul>
-	<li>Eliminate use of old RichEmbed class defined within <a href="ts/Command.Defaults.ts">Command.Defaults</a> in favor of my actual <a href="ts/RichEmbed.ts">RichEmbed</a> implementation</li>
-	<li>Fix file layouts; move subclasses (i.e., <a href="ts/Google.ts">Google.Search</a>, <a href="ts/Google.ts">Google.Timezone</a>, etc.) into their own subdirectories; create and rename files that should already be in their own subdirectory (i.e., <a href="ts/Command.Default.ts">Command.Default</a> and <a href="ts/Command.Parser.ts">Command.Parser</a>)</li>
-	<li>Do some sort of <code>stats</code> command, or something that queries mongo and returns the person who issues the most commands or the most used commands or both</li>
-	<li>Maybe a <code>weather</code> command?</li>
-	<li>Add support in <a href="ts/GenericApi.ts">GenericApi</a> for sending/receiving gzip encoded http requests (http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression)</li>
-	<li>Move more of the duplicate code in <a href="ts/pfc.ts">pfc</a> and <a href="ts/plush.ts">plush</a> to <a href="ts/BotExecutor.ts">BotExecutor</a></li>
-	<li>Set up some more versatile communication between <a href="ts/BotExecutor.ts">BotExecutor</a> and the bot files (<a href="ts/pfc.ts">pfc</a> and <a href="ts/plush.ts">plush</a>)
-	<ul>
-		<li>Perhaps by establishing some sort of timer on <a href="ts/BotExecutor.ts">BotExecutor</a> that queries the bot file itself occasionally to prevent random issues where the child process will die without notifications, or when the child will disconnect and not try reconnecting</li>
-		<li>Maybe the bot files themselves should be abstracted to a higher class?  May make configuring new bots easier</li>
-	</ul>
-	<li>To solve random disconnection issues, or at least mitigate the length of disconnection, perhaps reset the bot's connection (kill/restart) every day or so?</li>
-	<li>Convert the README.md file back to a HTML file?  I hate md</li>
-</ul>
+- [ ] Add `images` command to search Google images (exact same API implementation as current [Google.Search](ts/Google.ts), only with `searchType=image` added as a query parameter)
+- [ ] Modify the [Google.Search](ts/Google.ts) API calls (and any other Google APIs that support it) to make use of the `files=` parameter in the request to reduce unnecessary data (https://developers.google.com/custom-search/json-api/v1/performance)
+- [ ] Change all commands that fit the [Embeddable](ts/Embeddable.ts) profile to make use of the new abstract class; current candidates in process:
+  - [ ] `4chan`
+- [ ] Eliminate use of old `RichEmbed` class defined within [Command.Defaults](ts/Command.Defaults.ts) in favor of my actual [RichEmbed](ts/RichEmbed.ts) implementation
+- [ ] Fix file layouts; move subclasses (i.e., [Google.Search](ts/Google.ts), [Google.Timezone](ts/Google.ts), etc.) into their own subdirectories; create and rename files that should already be in their own subdirectory (i.e., [Command.Defaults](ts/Command.Defaults.ts) and [Command.Parser](ts/Command.Parser.ts))
+- [ ] Do some sort of `stats` command, or something that queries mongo and returns the person who issues the most commands or the most used commands or both
+- [ ] Maybe a `weather` command?
+- [ ] Add support in [GenericApi](ts/GenericApi.ts) for sending/receiving gzip encoded http requests (http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression)
+- [ ] Move more of the duplicate code in [pfc](ts/pfc.ts) and [plush](ts/plush.ts) to [BotExecutor](ts/BotExecutor.ts)
+- [ ] Set up some more versatile communication between [BotExecutor](ts/BotExecutor.ts) and the bot files ([pfc](ts/pfc.ts) and [plush](ts/plush.ts))
+  - Perhaps by establishing some sort of timer on [BotExecutor](ts/BotExecutor.ts) that queries the bot file itself occasionally to prevent random issues where the child process will die without notifications, or when the child will disconnect and not try reconnecting
+  -  Maybe the bot files themselves should be abstracted to a higher class?  May make configuring new bots easier
+- [ ] To solve random disconnection issues, or at least mitigate the length of disconnection, perhaps reset the bot's connection (kill/restart) every day or so?
+- [ ] Convert the [README.md](README.md) file back to a HTML file?  I hate md
 
 ## How can I set it up?
 
@@ -123,4 +117,4 @@ I've yet to test any of this outside of my current bot configurations, but if yo
 [`podbot`](https://github.com/CorpulentBrony/podbot) by <a href="https://github.com/CorpulentBrony" rel="author">Corpulent Brony</a> is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
 Read more here: <a href="LICENSE.md" rel="license">LICENSE.md</a>
 
-tl;dr DONUT STEELE
+tl;dr **DONUT STEELE**
