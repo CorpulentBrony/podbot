@@ -1,6 +1,6 @@
 import { Collection as CommandCollection } from "./Collection";
-import { Defaults as CommandDefaults } from "./Command.Defaults";
-import { Parser as CommandParser } from "./Command.Parser";
+import { Defaults as CommandDefaults } from "./Command/Defaults";
+import { Parser as CommandParser } from "./Command/Parser";
 import * as Discord from "discord.js";
 import { GenericBot } from "./GenericBot";
 import { RichEmbed } from "./RichEmbed";

@@ -1,5 +1,5 @@
-import { Command } from "./Command";
-import { GenericBot } from "./GenericBot";
+import { Command } from "../Command";
+import { GenericBot } from "../GenericBot";
 import * as Discord from "discord.js";
 import * as Events from "events";
 

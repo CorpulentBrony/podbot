@@ -1,13 +1,13 @@
-import { Collection } from "./Collection";
-import { DateFormatted } from "./DateFormatted";
-import { Derpibooru } from "./Derpibooru";
+import { Collection } from "../Collection";
+import { DateFormatted } from "../DateFormatted";
+import { Derpibooru } from "../Derpibooru";
 import * as Discord from "discord.js";
-import * as FourChan from "./FourChan";
-import { GenericBot } from "./GenericBot";
-import { Google } from "./Google";
-import { Query } from "./Url";
-import { RichEmbed as NewRichEmbed } from "./RichEmbed";
-import { YouTube } from "./YouTube";
+import * as FourChan from "../FourChan";
+import { GenericBot } from "../GenericBot";
+import { Google } from "../Google";
+import { Query } from "../Url";
+import { RichEmbed as NewRichEmbed } from "../RichEmbed";
+import { YouTube } from "../YouTube";
 
 export class Defaults {
 	public static async ["4chan"](parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> { return Defaults.fourChan(parsedCommand); }
