@@ -4,6 +4,7 @@
 <link rel="publisher" type="text/html" href="https://plus.google.com/+CorpulentBrony" hreflang="en">
 <link rel="bestpony" type="text/html" href="http://tsibp.com" hreflang="en">
 <meta name="bestpony" content="Twilight Sparkle">
+
 # podbot
 
 ## **_notices your bot_**
@@ -88,6 +89,7 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 		<li>Maybe the bot files themselves should be abstracted to a higher class?  May make configuring new bots easier</li>
 	</ul>
 	<li>To solve random disconnection issues, or at least mitigate the length of disconnection, perhaps reset the bot's connection (kill/restart) every day or so?</li>
+	<li>Convert the README.md file back to a HTML file?  I hate md</li>
 </ul>
 
 ## How can I set it up?
