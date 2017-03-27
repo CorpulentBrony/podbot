@@ -2,7 +2,7 @@ import { Collection } from "./Collection";
 import { Embeddable } from "./Embeddable";
 import { GenericApi } from "./GenericApi";
 import { GenericBot } from "./GenericBot";
-import { Embed, Reactor } from "./Reactor";
+import { RichEmbed as Embed } from "./RichEmbed";
 import { Path, Query, Url } from "./Url";
 import * as Random from "./Random";
 
@@ -14,7 +14,7 @@ const FILTER_ID: number = 56027;
 
 export class NoponyError extends Error {}
 
-export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpibooru.Like, Reactor.Command {
+export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpibooru.Like {
 	private _results: Array<Derpibooru.Image>;
 	public readonly type: "random" | "search";
 
