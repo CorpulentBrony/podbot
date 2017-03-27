@@ -4,7 +4,7 @@ import { Derpibooru } from "./Derpibooru";
 import * as Discord from "discord.js";
 import * as FourChan from "./FourChan";
 import { GenericBot } from "./GenericBot";
-import * as Google from "./Google";
+import { Google } from "./Google";
 import { Query } from "./Url";
 import { RichEmbed as NewRichEmbed } from "./RichEmbed";
 import { YouTube } from "./YouTube";
@@ -59,7 +59,7 @@ export namespace Defaults {
 	export async function db(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
 		const command: Derpibooru = new Derpibooru(parsedCommand);
 
-		try { await command.fetch(); }
+		try { await command.search(); }
 		catch (err) {
 			if (err instanceof Derpibooru.NoponyError)
 				return say(parsedCommand, err.message);
@@ -98,28 +98,40 @@ export namespace Defaults {
 	}
 
 	export async function google(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
-		const results: Google.Search.Response = await Google.search(parsedCommand.args);
-		const message: RichEmbed = new RichEmbed({
-			author: parsedCommand.requester, 
-			description: (results.items) ? parsedCommand.args : "Your search - " + parsedCommand.args + " - did not match any documents.",
-			footer: "Found " + results.searchInformation.formattedTotalResults + " results in " + results.searchInformation.formattedSearchTime + " seconds.",
-			footerImageUrl: Google.favIconUrl.toString(),
-			title: "Google Search Results",
-			url: Google.genericQueryUrl.setQuery(new Query({ q: parsedCommand.args })).toString()
-		});
+		const command: Google.Search = new Google.Search(parsedCommand);
 
-		if (results.items)
-			for (let i: number = 0; i < 3; i++) {
-				message.addField(results.items[i].title, results.items[i].link + "\n" + results.items[i].snippet);
+		try { await command.search(); }
+		catch (err) {
+			if (err instanceof Google.Search.Error)
+				return say(parsedCommand, err.message);
+			else
+				throw err;
+		}
+		const embed: NewRichEmbed = await command.send();
+		parsedCommand.bot.reactor.add(embed);
+		return embed.message;
+		// const results: Google.Search.Response = await Google.search(parsedCommand.args);
+		// const message: RichEmbed = new RichEmbed({
+		// 	author: parsedCommand.requester, 
+		// 	description: (results.items) ? parsedCommand.args : "Your search - " + parsedCommand.args + " - did not match any documents.",
+		// 	footer: "Found " + results.searchInformation.formattedTotalResults + " results in " + results.searchInformation.formattedSearchTime + " seconds.",
+		// 	footerImageUrl: Google.favIconUrl.toString(),
+		// 	title: "Google Search Results",
+		// 	url: Google.genericQueryUrl.setQuery(new Query({ q: parsedCommand.args })).toString()
+		// });
 
-				if (!message.thumbnail)
-					if (results.items[i].pagemap)
-						if (results.items[i].pagemap.cse_thumbnail && results.items[i].pagemap.cse_thumbnail[0].src)
-							message.setThumbnail(results.items[i].pagemap.cse_thumbnail[0].src);
-						else if (results.items[i].pagemap.cse_image && results.items[i].pagemap.cse_image[0].src)
-							message.setThumbnail(results.items[i].pagemap.cse_image[0].src);
-			}
-		return parsedCommand.channel.sendEmbed(message, undefined, { split: true });
+		// if (results.items)
+		// 	for (let i: number = 0; i < 3; i++) {
+		// 		message.addField(results.items[i].title, results.items[i].link + "\n" + results.items[i].snippet);
+
+		// 		if (!message.thumbnail)
+		// 			if (results.items[i].pagemap)
+		// 				if (results.items[i].pagemap.cse_thumbnail && results.items[i].pagemap.cse_thumbnail[0].src)
+		// 					message.setThumbnail(results.items[i].pagemap.cse_thumbnail[0].src);
+		// 				else if (results.items[i].pagemap.cse_image && results.items[i].pagemap.cse_image[0].src)
+		// 					message.setThumbnail(results.items[i].pagemap.cse_image[0].src);
+		// 	}
+		// return parsedCommand.channel.sendEmbed(message, undefined, { split: true });
 	}
 
 	function isBotOrDmChannel(channel: GenericBot.Command.TextBasedChannel): boolean { return channel instanceof Discord.DMChannel || channel instanceof Discord.GroupDMChannel || channel instanceof Discord.TextChannel && /bot/gi.test(channel.name); }

@@ -1,117 +1,124 @@
 import { Collection } from "./Collection";
-import { Embed, Reactor } from "./Reactor";
+import { Embeddable } from "./Embeddable";
 import { GenericApi } from "./GenericApi";
 import { GenericBot } from "./GenericBot";
+import { Embed, Reactor } from "./Reactor";
 import { Path, Query, Url } from "./Url";
 import * as Random from "./Random";
 
-const filter_id: number = 41048;
-const url: Url = new Url("https://derpibooru.org");
-const pathname: { search: Path, random: Path } = { search: new Path("/search.json"), random: new Path("/images.json") };
-const query: { search: Query, random: Query } = { search: new Query({ filter_id }), random: new Query({ filter_id, random_image: true }) };
+const API_RANDOM_PATH: string = "/images.json";
+const API_SEARCH_PATH: string = "/search.json";
+const BASE_URL: string = "https://derpibooru.org";
+const FAVICON_PATH: string = "/favicon.ico";
+const FILTER_ID: number = 56027;
 
 export class NoponyError extends Error {}
 
-export class Derpibooru implements Derpibooru.Like, Reactor.Command {
-	private _embeds: Array<Embed.Options>;
-	private _images: Array<Derpibooru.Image>;
-	public readonly bot: GenericBot;
-	public readonly channel: GenericBot.Command.TextBasedChannel;
-	public readonly parsedCommand: GenericBot.Command.Parser.ParsedCommand;
-	public readonly query: Query;
+export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpibooru.Like, Reactor.Command {
+	private _results: Array<Derpibooru.Image>;
 	public readonly type: "random" | "search";
-	public readonly url: Url;
-	public readonly userInput: string;
 
 	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand) {
-		if (parsedCommand.args === "" || parsedCommand.args === "random")
-			[this.query, this.type, this.url] = [query.random, "random", url.setPathname(pathname.random)];
-		else
-			[this.query, this.type, this.url, this.userInput] = [query.search.set("q", parsedCommand.args.replace(/best pony/g, "twilight sparkle")), "search", url.setPathname(pathname.search), parsedCommand.args];
-		this.parsedCommand = parsedCommand;
+		super(parsedCommand);
+		this.type = (this.userInput === "" || this.userInput === "random") ? "random" : "search";
 	}
 
 	public get embeds(): Array<Embed.Options> {
-		if (this._embeds)
-			return this._embeds;
-		return this._embeds = this.images.reduce<Array<Embed.Options>>((embeds: Array<Embed.Options>, image: Derpibooru.Image): Array<Embed.Options> => {
-			embeds.push({
+		if (!this.results)
+			return undefined;
+		return super.getEmbeds((image: Derpibooru.Image): Embed.Options => {
+			return {
 				description: image.file_name + " uploaded by " + image.uploader,
-				footer: { icon_url: Derpibooru.favIconUrl.toString(), text: image.tags },
-				image: { url: image.imageUrl },
-				title: image.pageUrl,
-				url: image.pageUrl }
-			);
-			return embeds;
-		}, new Array<Embed.Options>());
+				footer: { icon_url: Derpibooru.Urls.favIcon.toString(), text: image.tags },
+				image: { url: image.imageUrl.toString() },
+				title: image.pageUrl.toString(),
+				url: image.pageUrl.toString()
+			};
+		});
 	}
 
-	public get images(): Array<Derpibooru.Image> { return this._images; }
+	public get results(): Array<Derpibooru.Image> { return this._results; }
 
-	public set images(images: Array<Derpibooru.Image>) {
+	public set results(images: Array<Derpibooru.Image>) {
 		if (typeof images === "undefined")
 			return;
-		this._images = images.map<Derpibooru.Image>((image: Derpibooru.Image): Derpibooru.Image => {
+		this._results = images.map<Derpibooru.Image>((image: Derpibooru.Image): Derpibooru.Image => {
 			if (typeof image.id === "undefined")
 				console.log("found undefined image!!!\n", images);
 			return Object.defineProperties(image, {
-				imageUrl: { get: function(): string { return Derpibooru.Response.formatImageUrl(this); } },
-				pageUrl: { get: function(): string { return Derpibooru.Response.formatImagePageUrl(this); } }
+				imageUrl: { get: function(): Url { return Derpibooru.Image.getImageUrl(this); } },
+				pageUrl: { get: function(): Url { return Derpibooru.Image.getPageUrl(this); } }
 			});
 		});
 	}
 
-	public async fetch() { (this.type === "search") ? await this.search() : await this.random(); }
-	private async getImages<T extends Derpibooru.Response.Random | Derpibooru.Response.Search>(): Promise<T> { return GenericApi.Get.json<T>(this.url, this.query); }
+	protected configureQuery() {
+		this.query.set("filter_id", Derpibooru.filterId).delete("page");
 
-	public async random() {
-		const images: Derpibooru.Response.Random = await this.getImages<Derpibooru.Response.Random>();
-		this.images = await Random.shuffle<Derpibooru.Response.Image>(images.images);
+		if (this.type === "search")
+			this.query.set("q", this.userInput.replace(/best pony/g, "twilight sparkle"));
+		else
+			this.query.set("random_image", true);
 	}
 
 	public async search() {
-		this.query.delete("page");
-		let images: Derpibooru.Response.Search = await this.getImages<Derpibooru.Response.Search>();
+		let images: Array<Derpibooru.Response.Image>;
+		this.configureQuery();
 
-		if (images.total === 0)
-			throw new Derpibooru.NoponyError("No images were found for `" + this.userInput + "`");
-		const pageNumber: number = (images.total > images.search.length) ? (await Random.integer(Math.ceil(images.total / images.search.length)) + 1) : 1;
+		if (this.type === "random") {
+			const response: Derpibooru.Response.Random = await GenericApi.Get.json<Derpibooru.Response.Random>(Derpibooru.Urls.random, this.query);
+			images = response.images;
+		} else {
+			let response: Derpibooru.Response.Search = await GenericApi.Get.json<Derpibooru.Response.Search>(Derpibooru.Urls.search, this.query);
 
-		if (pageNumber > 1) {
-			this.query.set("page", pageNumber);
-			images = await this.getImages<Derpibooru.Response.Search>();
+			if (response.total === 0)
+				throw new Derpibooru.NoponyError("No images were found for `" + this.userInput + "`");
+			const pageNumber: number = (response.total > response.search.length) ? (await Random.integer(Math.ceil(response.total / response.search.length)) + 1) : 1;
+
+			if (pageNumber > 1) {
+				this.query.set("page", pageNumber);
+				response = await GenericApi.Get.json<Derpibooru.Response.Search>(Derpibooru.Urls.search, this.query);
+			}
+			images = response.search;
 		}
-		const shuffled: Array<Derpibooru.Response.Image> = await Random.shuffle<Derpibooru.Response.Image>(images.search);
-		
-		if (typeof shuffled[0] === "undefined")
-			console.log(shuffled);
-		this.images = shuffled;
-	}
-
-	public async send(): Promise<Embed> {
-		const embed: Embed = new Embed(this.parsedCommand, this.embeds);
-		await embed.send();
-		return embed;
+		this.results = await Random.shuffle<Derpibooru.Response.Image>(images);
 	}
 }
 
 export namespace Derpibooru {
-	export interface Constructor {}
-
 	export interface Image extends Response.Image {
 		readonly imageUrl?: string;
 		readonly pageUrl?: string;
 	}
 
-	export interface Like {
-		readonly query: Query;
-		readonly url: Url;
-		readonly userInput?: string;
+	export namespace Image {
+		export function getImageUrl(image: Image): Url { return Url.parse(image.image, true).setProtocol("https:"); }
+
+		export function getPageUrl(image: Image): Url {
+			const path: Path = new Path("/" + image.id);
+			return Urls.base.setPathname(path);
+		}
 	}
+
+	export interface Like {
+		readonly type: "random" | "search";
+
+		search();
+	} export declare const Like: {
+		prototype: Like;
+
+		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Like;
+	};
 
 	export class NoponyError extends Error {}
 
-	export const favIconUrl: Url = url.setPathname(new Path("/favicon.ico"));
+	export const filterId: number = FILTER_ID;
+
+	namespace Paths {
+		export const favIcon: Path = new Path(FAVICON_PATH);
+		export const random: Path = new Path(API_RANDOM_PATH);
+		export const search: Path = new Path(API_SEARCH_PATH);
+	}
 
 	export namespace Response {
 		export interface Image {
@@ -132,8 +139,12 @@ export namespace Derpibooru {
 			search: Array<Image>;
 			total: number;
 		}
+	}
 
-		export function formatImagePageUrl(image: Image): string { return url.setPathname(new Path("/" + image.id)).toString(); }
-		export function formatImageUrl(image: Image): string { return Url.parse(image.image, true).setProtocol("https:").toString(); }
+	export namespace Urls {
+		export const base: Url = new Url(BASE_URL);
+		export const favIcon: Url = base.setPathname(Paths.favIcon);
+		export const random: Url = base.setPathname(Paths.random);
+		export const search: Url = base.setPathname(Paths.search);
 	}
 }

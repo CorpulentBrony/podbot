@@ -1,4 +1,5 @@
 import * as Crypt from "./Crypt";
+import { Embeddable } from "./Embeddable";
 import * as EventEmitter from "events";
 import { GenericApi } from "./GenericApi";
 import { GenericBot } from "./GenericBot";
@@ -11,56 +12,46 @@ const YOUTUBE_API_ACTIVITIES_PATH: string = "activities";
 const YOUTUBE_API_BASE_PATH: string = "/youtube/v3";
 const YOUTUBE_API_SEARCH_PATH: string = "search";
 
-export class YouTube implements Reactor.Command, YouTube.Like {
-	private _embeds: Array<Embed.Options>;
-	private _videos: Array<YouTube.Response.ItemUrls>;
-	public readonly bot: GenericBot;
-	public readonly channel: GenericBot.Command.TextBasedChannel;
-	public readonly parsedCommand: GenericBot.Command.Parser.ParsedCommand;
-	public readonly query: Query;
-
-	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand) {
-		[this.parsedCommand, this.query] = [parsedCommand, new Query()];
-	}
+export class YouTube extends Embeddable<YouTube.Response.ItemUrls> implements YouTube.Like {
+	private _results: Array<YouTube.Response.ItemUrls>;
 
 	public get embeds(): Array<Embed.Options> {
-		if (this._embeds)
-			return this._embeds;
-		return this._embeds = this.videos.reduce<Array<Embed.Options>>((embeds: Array<Embed.Options>, video: YouTube.Response.ItemUrls, index: number, videos: Array<YouTube.Response.ItemUrls>): Array<Embed.Options> => {
+		if (!this.results)
+			return undefined;
+		return super.getEmbeds((video: YouTube.Response.ItemUrls, index: number, videos: Array<YouTube.Response.ItemUrls>): Embed.Options => {
 			if (video.snippet && video.id && video.id.videoId) {
 				const next: string = ((videos[index + 1] && videos[index + 1].snippet && videos[index + 1].snippet.title) ? videos[index + 1].snippet.title + "  >>" : "");
 				const prev: string = ((videos[index - 1] && videos[index - 1].snippet && videos[index - 1].snippet.title) ? "<<  " + videos[index - 1].snippet.title : "");
-				embeds.push({
+				return {
 					description: video.snippet.description ? video.snippet.description : "",
 					footer: { icon_url: YouTube.Urls.favicon.toString(), text: (next.length > 0 && prev.length > 0) ? prev + "  |  " + next : prev + next },
 					image: { url: video.thumbnailUrl.toString() },
 					title: (video.snippet.title ? video.snippet.title : "") + (video.snippet.channelTitle ? "\n" + video.snippet.channelTitle : ""),
 					url: video.videoUrl.toString(),
 					video: { height: 225, url: video.videoUrl.toString(), width: 400 }
-				});
+				};
 			}
-			return embeds;
-		}, new Array<Embed.Options>());
+			return {};
+		});
 	}
 
-	public get userInput(): string { return this.parsedCommand.args; }
-	public get videos(): Array<YouTube.Response.ItemUrls> { return this._videos; }
+	public get results(): Array<YouTube.Response.ItemUrls> { return this._results; }
 
-	public set videos(videos: Array<YouTube.Response.ItemUrls>) {
+	public set results(videos: Array<YouTube.Response.ItemUrls>) {
 		if (typeof videos === "undefined")
 			return;
-		this._videos = videos.map<YouTube.Response.Item>((video: YouTube.Response.Item): YouTube.Response.Item => Object.defineProperties(video, {
+		this._results = videos.map<YouTube.Response.Item>((video: YouTube.Response.Item): YouTube.Response.Item => Object.defineProperties(video, {
 			channelUrl: { get: function(): Url { return YouTube.Response.Item.getChannelUrl(this); } },
 			thumbnailUrl: { get: function(): Url { return YouTube.Response.Item.getThumbnailUrl(this); } },
 			videoUrl: { get: function(): Url {
 				if (this.id)
 					return YouTube.Response.Item.getVideoUrl(this.id);
-				return undefined;
+				return new Url();
 			} }
 		}));
 	}
 
-	public async configureQuery(query: string) { this.query.set("maxResults", 50).set("part", "snippet").set("q", query).set("safeSearch", "none").set("type", "video").set("key", await Google.getKey()); }
+	protected async configureQuery(query: string) { this.query.set("maxResults", 50).set("part", "snippet").set("q", query).set("safeSearch", "none").set("type", "video").set("key", await Google.getKey()); }
 
 	public async search(query: string = this.userInput) {
 		if (!query || query === "")
@@ -71,27 +62,14 @@ export class YouTube implements Reactor.Command, YouTube.Like {
 
 		if (!result || !result.items || result.items.length === 0)
 			throw new YouTube.Error("No videos were found for `" + query + "`");
-		this.videos = result.items;
-	}
-
-	public async send(): Promise<Embed> {
-		const embed: Embed = new Embed(this.parsedCommand, this.embeds);
-		await embed.send();
-		return embed;
+		this.results = result.items;
 	}
 }
 
 export namespace YouTube {
 	export interface Like {
-		readonly query: Query;
-		readonly userInput: string;
-		videos: Array<Response.ItemUrls>;
-
-		configureQuery(query: string);
 		search(query?: string);
-	}
-
-	export declare const Like: {
+	} export declare const Like: {
 		prototype: Like;
 
 		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Like;
@@ -123,7 +101,7 @@ export namespace YouTube {
 			export function getChannelUrl(item: Item): Url {
 				if (item.snippet && item.snippet.channelId)
 					return Urls.base.setPathname(Paths.channel.join(item.snippet.channelId));
-				return undefined;
+				return new Url();
 			}
 
 			export function getThumbnailUrl(item: Item): Url {
@@ -133,13 +111,13 @@ export namespace YouTube {
 					if (thumbnail && thumbnail.url)
 						return new Url(thumbnail.url);
 				}
-				return undefined;
+				return new Url();
 			}
 
 			export function getVideoUrl(resource: Resource): Url {
 				if (resource.videoId)
 					return YouTube.Urls.watch.setQuery(new Query({ v: resource.videoId }));
-				return undefined;
+				return new Url();
 			}
 		}
 
@@ -194,7 +172,7 @@ export namespace YouTube {
 	}
 }
 
-class YouTubeChannelMonitor extends EventEmitter implements YouTubeChannelMonitor.Like {
+class YouTubeChannelMonitor extends EventEmitter implements YouTube.ChannelMonitor.Like {
 	private _lastVideo: YouTube.Response.ItemUrls;
 	public etag: string;
 	public frequencySeconds: number;

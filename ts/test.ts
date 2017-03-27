@@ -1,6 +1,13 @@
-import { Path, Query, Url } from "./Url";
+abstract class Foo {
+	public readonly test: string = "hello from Foo";
 
-const url = new Url("https://www.google.com:443/testing/fag.php");
-console.log(url);
-console.log(url.query.toString());
-console.log(url.toString());
+	public funTimes() { console.log(this.test); }
+}
+
+class Bar extends Foo {
+	public get test(): string { return "hello from Bar"; }
+}
+
+const bar = new Bar();
+console.log(bar.test);
+bar.funTimes();

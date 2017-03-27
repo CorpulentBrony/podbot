@@ -11,10 +11,13 @@ export class Url implements Url.Like {
 	public query: Query = null;
 	public slashes: boolean = true;
 	
+	constructor();
 	constructor(url: Url | Url.Like);
 	constructor(href: string, slashesDenoteHost?: boolean);
-	constructor(hrefOrUrl: string | Url | Url.Like, slashesDenoteHost: boolean = false) {
-		if (hrefOrUrl instanceof Url)
+	constructor(hrefOrUrl?: string | Url | Url.Like, slashesDenoteHost: boolean = false) {
+		if (typeof hrefOrUrl === "undefined")
+			this.slashes = false;
+		else if (hrefOrUrl instanceof Url)
 			({ hash: this.hash, hostname: this.hostname, pathname: this.pathname, port: this.port, protocol: this.protocol, query: this.query, slashes: this.slashes } = hrefOrUrl);
 		else {
 			let url: Url.Like;
@@ -42,7 +45,7 @@ export class Url implements Url.Like {
 		return (result === "") ? null : result;
 	}
 
-	public get search(): string { return this.query.size > 0 ? "?" + this.query.toString() : null; }
+	public get search(): string { return (this.query && this.query.size > 0) ? "?" + this.query.toString() : null; }
 
 	public clone(url?: Url.Like): Url {
 		const result: Url = new Url(this);
