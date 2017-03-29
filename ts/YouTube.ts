@@ -64,7 +64,7 @@ export class YouTube extends Embeddable<YouTube.Response.ItemUrls> implements Yo
 }
 
 export namespace YouTube {
-	export interface Like {
+	export interface Like extends Embeddable.Like<YouTube.Response.ItemUrls> {
 		search(query?: string);
 	} export declare const Like: {
 		prototype: Like;

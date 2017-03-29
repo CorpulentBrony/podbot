@@ -21,6 +21,8 @@ commands.set("any", { command: (parsedCommand: GenericBot.Command.Parser.ParsedC
 	.set("db", { default: true })
 	.set("dp", { alias: "db" })
 	.set("google", { default: true })
+	.set("image", { default: true })
+	.set("images", { alias: "image" })
 	.set("pfc", { command: (parsedCommand: GenericBot.Command.Parser.ParsedCommand): void => { pfc(parsedCommand).catch(console.error); } })
 	.set("ping", { default: true })
 	.set("regind", { default: true })

@@ -104,6 +104,21 @@ export namespace Defaults {
 		return embed.message;
 	}
 
+	export async function image(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
+		const command: Google.Search.Image = new Google.Search.Image(parsedCommand);
+
+		try { await command.search(); }
+		catch (err) {
+			if (err instanceof Google.Search.Error)
+				return say(parsedCommand, err.message);
+			else
+				throw err;
+		}
+		const embed: NewRichEmbed = await command.send();
+		parsedCommand.bot.reactor.add(embed);
+		return embed.message;
+	}
+
 	function isBotOrDmChannel(channel: GenericBot.Command.TextBasedChannel): boolean { return channel instanceof Discord.DMChannel || channel instanceof Discord.GroupDMChannel || channel instanceof Discord.TextChannel && /bot/gi.test(channel.name); }
 
 	export async function ping(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {

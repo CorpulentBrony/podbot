@@ -35,7 +35,7 @@ export abstract class Embeddable<T> implements Embeddable.Like<T> {
 }
 
 export namespace Embeddable {
-	export interface Like<T> {
+	export declare class Like<T> {
 		readonly bot: GenericBot;
 		readonly channel: GenericBot.Command.TextBasedChannel;
 		readonly embeds: Array<Embed.Options>;
@@ -43,6 +43,8 @@ export namespace Embeddable {
 		readonly query: Query;
 		results: Array<T>;
 		readonly userInput: string;
+
+		constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand);
 
 		send(): Promise<Embed>;
 	}

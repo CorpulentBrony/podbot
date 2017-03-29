@@ -28,6 +28,8 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 	<dd>Searches <a href="https://www.derpibooru.org/" rel="external">Derpibooru</a>.  If no argument or <code>random</code> given, then a random image is returned; otherwise, a random image based on the <code><var>search</var></code> argument is returned.  The best searches on Derpibooru are tag searches and commas (<code>,</code>) can be used to &quot;and&quot; tags together.  Implements <a href="ts/Embeddable.ts">Embeddable</a> allowing end user to scroll through results.</dd>
 	<code>google <var>search</var></code>
 	<dd>Searches <a href="https://www.google.com/" rel="external">Google</a> and returns results matching the <code><var>search</var></code> argument.  Implements <a href="ts/Embeddable.ts">Embeddable</a> allowing end user to scroll through results.</dd>
+	<code>image <var>search</var></code>
+	<dd>Searches <a href="https://images.google.com/" rel="external">Google</a> and returns image results matching the <code><var>search</var></code> argument.  Implements <a href="ts/Embeddable.ts">Embeddable</a> allowing end user to scroll through results.</dd>
 	<code>ping</code>
 	<dd>Will show the current and average ping times to the bot's server.  The current ping time is based on the timestamp value attached to the command's message and the server's timestamp.  The average is directly from the discord.js API.  This command can only be used either via DM or in a channel which contains the word &quot;bot&quot; in its name.</dd>
 	<code>regind <var>message</var></code>

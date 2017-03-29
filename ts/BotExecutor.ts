@@ -1,6 +1,6 @@
 import { Buffer } from "buffer";
 import * as ChildProcess from "child_process";
-import { Google } from "./Google";
+//import { Google } from "./Google";
 import * as Net from "net";
 import { Path } from "./Url";
 
@@ -13,9 +13,9 @@ export class BotExecutor {
 	public readonly file: Path;
 	private name: string;
 	private process: ChildProcess.ChildProcess;
-	private timezone: Google.Timezone;
+	//private timezone: Google.Timezone;
 
-	constructor (file: Path, color: string = BotExecutor.colors.reset) { [this.color, this.file, this.name, this.timezone] = [color, file, file.basename().toString(), new Google.Timezone(SERVER_LATITUDE, SERVER_LONGITUDE)]; }
+	constructor (file: Path, color: string = BotExecutor.colors.reset) { [this.color, this.file, this.name/*, this.timezone*/] = [color, file, file.basename().toString()/*, new Google.Timezone(SERVER_LATITUDE, SERVER_LONGITUDE)*/]; }
 
 	public configure() {
 		this.process = this.fork();
@@ -28,7 +28,7 @@ export class BotExecutor {
 		this.process.stdout.on("error", (err: Error): void => this.onStdoutError(err));
 	}
 
-	private get prefix(): string { return this.color + " " + this.timezone.currentDateTime.slice(4, 24) + " <" + this.name + "> "; }
+	private get prefix(): string { return this.color + " " + /*this.timezone.currentDateTime*/Date().slice(4, 24) + " <" + this.name + "> "; }
 
 	private fork(): ChildProcess.ChildProcess { return ChildProcess.fork(this.file.toString(), [], { silent: true }); }
 	private onError(err: Error): void { console.error("BotExecutor error for " + this.name + "\n" + err.message); }
@@ -41,7 +41,7 @@ export class BotExecutor {
 	private async onMessage(message: any, sendHandle: Net.Socket | Net.Server) {
 		if (message.name) {
 			this.name = message.name;
-			await this.timezone.execute(this.name, this.color);
+			//await this.timezone.execute(this.name, this.color);
 		}
 	}
 

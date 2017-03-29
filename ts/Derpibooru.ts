@@ -100,7 +100,7 @@ export namespace Derpibooru {
 		}
 	}
 
-	export interface Like {
+	export interface Like extends Embeddable.Like<Derpibooru.Image> {
 		readonly type: "random" | "search";
 
 		search();

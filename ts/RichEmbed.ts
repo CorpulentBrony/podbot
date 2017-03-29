@@ -1,6 +1,7 @@
 import * as Discord from "discord.js";
 import { GenericBot } from "./GenericBot";
 
+// Object.defineProperty() is used in this class because the parent class Discord.RichEmbed would otherwise send invalid properties to the Discord server, resulting in errors.
 export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 	public readonly channel: GenericBot.Command.TextBasedChannel;
 	public readonly embeds: Array<RichEmbed.Options>;
@@ -17,22 +18,33 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 			description: parsedCommand.args,
 			title: parsedCommand.command
 		}, options));
-		this.channel = parsedCommand.channel;
+		Object.defineProperty(this, "channel", { enumerable: false, value: parsedCommand.channel });
+		// this.channel = parsedCommand.channel;
 
 		if (options.video)
 			this["video"] = options.video;
 
-		if (Array.isArray(embedsOrOptions)) 
-			[this.embeds, this.index] = [embedsOrOptions, 1];
-		Object.defineProperty(this, "channel", { enumerable: false });
-		Object.defineProperty(this, "embeds", { enumerable: false });
-		Object.defineProperty(this, "index", { enumerable: false, writable: true });
+		if (Array.isArray(embedsOrOptions))
+			Object.defineProperties(this, {
+				embeds: { enumerable: false, value: embedsOrOptions },
+				index: { enumerable: false, value: 0, writable: true }
+			});
+			// [this.embeds, this.index] = [embedsOrOptions, 0];
+		
+		// Object.defineProperty(this, "embeds", { enumerable: false });
+		// Object.defineProperty(this, "index", { enumerable: false, writable: true });
 		Object.defineProperty(this, "message", { enumerable: false, writable: true });
 	}
 
 	public async delete(): Promise<Discord.Message> { return this.message = await this.message.delete(); }
 	public next(): this { return this.set(this.index + 1); }
 	public prev(): this { return this.set(this.index - 1); }
+
+	public async send(): Promise<Discord.Message> {
+		if (this["video"] && this["video"].url)
+			return this.message = <Discord.Message>await this.channel.send(this["video"].url);
+		return this.message = await this.channel.sendEmbed(this, undefined, { split: true });
+	}
 
 	public set(index: number): this {
 		index = (index < 0) ? this.embeds.length + index : (index >= this.embeds.length) ? index - this.embeds.length : index;
@@ -41,16 +53,14 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 		return this.setOptions(this.embeds[this.index]);
 	}
 
-	public async send(): Promise<Discord.Message> {
-		if (this["video"] && this["video"].url)
-			return this.message = <Discord.Message>await this.channel.send(this["video"].url);
-		return this.message = await this.channel.sendEmbed(this, undefined, { split: true });
-	}
-
 	private setOptions(options: RichEmbed.Options = {}): this {
-		for (const option in options)
-			if (RichEmbed.options.has(option))
-				super[option] = options[option];
+		for (const option of RichEmbed.options) {
+			if (this[option])
+				delete this[option];
+
+			if (options[option])
+				this[option] = options[option];
+		}
 		return this;
 	}
 
@@ -64,16 +74,23 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 export namespace RichEmbed {
 	export type Options = Discord.RichEmbedOptions;
 	export const options: Set<string> = new Set<string>(["title", "description", "url", "timestamp", "color", "fields", "author", "thumbnail", "image", "video", "footer"]);
-	export interface Constructor {
+
+	export interface Like extends Discord.RichEmbed {
+		readonly channel: GenericBot.Command.TextBasedChannel;
+		readonly embeds: Array<RichEmbed.Options>;
+		index: number;
+		message: Discord.Message;
+
+		delete(): Promise<Discord.Message>;
+		next(): this;
+		prev(): this;
+		send(): Promise<Discord.Message>;
+		set(index: number): this;
+		update(): Promise<Discord.Message>;
+	} export declare const Like: {
 		prototype: Like;
 
-		new?(parsedCommand: GenericBot.Command.Parser.ParsedCommand, options?: Options): Like;
-	}
-
-	export interface Like {
-		readonly channel: GenericBot.Command.TextBasedChannel;
-		constructor: Constructor;
-
-		send(): Promise<Discord.Message>;
-	}
+		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand, embeds: Array<RichEmbed.Options>);
+		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand, options?: RichEmbed.Options);
+	};
 }

@@ -8,31 +8,29 @@ import { Path, Query, Url } from "../Url";
 const GOOGLE_SEARCH_API: string = "/customsearch/v1";
 
 export class Search extends Embeddable<Google.Search.Result.Item> implements Google.Search.Like {
-	private _results: Array<Google.Search.Result.Item>;
+	private _footer: { text?: string; icon_url?: string; };
+	protected _results: Array<Google.Search.Result.Item> = undefined;
 	public searchInformation: Google.Search.Information;
 
 	public get embeds(): Array<Embed.Options> {
 		if (!this.results)
 			return undefined;
-		return super.getEmbeds((item: Google.Search.Result.Item, index: number): Embed.Options => {
-			let [prefix, suffix]: [string, string] = ["Results ", ""];
+		return super.getEmbeds((item: Google.Search.Result.Item): Embed.Options => this.getEmbed(item));
+	}
 
-			if (this.searchInformation) {
-				if (this.searchInformation.formattedTotalResults)
-					prefix = "Found " + this.searchInformation.formattedTotalResults + " results ";
+	protected get footer(): { text?: string; icon_url?: string; } {
+		if (this._footer)
+			return this._footer;
+		let [prefix, suffix]: [string, string] = ["Results ", ""];
 
-				if (this.searchInformation.formattedSearchTime)
-					suffix = " in " + this.searchInformation.formattedSearchTime + " seconds";
-			}
+		if (this.searchInformation) {
+			if (this.searchInformation.formattedTotalResults)
+				prefix = "Found " + this.searchInformation.formattedTotalResults + " results ";
 
-			return {
-				description: item.snippet ? item.snippet : "",
-				footer: { icon_url: Google.Urls.favIcon.toString(), text: prefix + "for query: \"" + this.userInput + "\"" + suffix },
-				title: item.title ? item.title : "",
-				thumbnail: { url: item.thumbnailUrl.toString() },
-				url: item.link ? item.link : ""
-			};
-		});
+			if (this.searchInformation.formattedSearchTime)
+				suffix = " in " + this.searchInformation.formattedSearchTime + " seconds";
+		}
+		return this._footer = { icon_url: Google.Urls.favIcon.toString(), text: prefix + "for query: \"" + this.userInput + "\"" + suffix };
 	}
 
 	public get results(): Array<Google.Search.Result.Item> { return this._results; }
@@ -40,14 +38,22 @@ export class Search extends Embeddable<Google.Search.Result.Item> implements Goo
 	public set results(results: Array<Google.Search.Result.Item>) {
 		if (typeof results === "undefined")
 			return;
-		this._results = results.map<Google.Search.Result.Item>((item: Google.Search.Result.Item): Google.Search.Result.Item => Object.defineProperties(item, {
-			thumbnailUrl: { get: function(): Url { return Google.Search.Result.Item.getThumbnailUrl(this); } }
-		}));
+		this.setResults(results);
 	}
 
 	protected async configureQuery(query: string) {
 		const secrets: Google.Secrets = await Google.getSecrets();
 		this.query.set("cx", secrets.cx).set("key", secrets.key).set("num", 10).set("q", query);
+	}
+
+	protected getEmbed(item: Google.Search.Result.Item): Embed.Options {
+		return {
+			description: item.snippet ? item.snippet : "",
+			footer: this.footer,
+			title: item.title ? item.title : "",
+			thumbnail: { url: item.thumbnailUrl.toString() },
+			url: item.link ? item.link : ""
+		};
 	}
 
 	public async search(query: string = this.userInput) {
@@ -61,10 +67,16 @@ export class Search extends Embeddable<Google.Search.Result.Item> implements Goo
 			throw new Google.Search.Error("No results were found for `" + query + "`");
 		[this.results, this.searchInformation] = [result.items, result.searchInformation ? result.searchInformation : undefined];
 	}
+
+	protected setResults(results: Array<Google.Search.Result.Item>): void {
+		this._results = results.map<Google.Search.Result.Item>((item: Google.Search.Result.Item): Google.Search.Result.Item => Object.defineProperties(item, {
+			thumbnailUrl: { get: function(): Url { return Google.Search.Result.Item.getThumbnailUrl(this); } }
+		}));
+	}
 }
 
 export namespace Search {
-	export interface Like {
+	export interface Like extends Embeddable.Like<Google.Search.Result.Item> {
 		searchInformation: Google.Search.Information;
 
 		search(query?: string);
@@ -82,9 +94,10 @@ export namespace Search {
 	export namespace Result {
 		export interface Item {
 			displayLink: string;
-			formattedUrl: string;
+			formattedUrl?: string;
+			image?: { contextLink?: string; }
 			link: string;
-			pagemap: {
+			pagemap?: {
 				cse_image?: Array<Item.Image>;
 				cse_thumbnail?: Array<Item.Thumbnail>;
 			};
@@ -128,4 +141,10 @@ export namespace Search {
 	export namespace Urls {
 		export const api: Url = Google.Urls.api.setPathname(Paths.api);
 	}
+}
+
+import { Image as SearchImage } from "./Image";
+
+export namespace Search {
+	export import Image = SearchImage;
 }
