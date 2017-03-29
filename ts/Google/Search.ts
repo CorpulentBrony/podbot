@@ -43,7 +43,7 @@ export class Search extends Embeddable<Google.Search.Result.Item> implements Goo
 
 	protected async configureQuery(query: string) {
 		const secrets: Google.Secrets = await Google.getSecrets();
-		this.query.set("cx", secrets.cx).set("key", secrets.key).set("num", 10).set("q", query);
+		this.query.set("cx", secrets.cx).set("fields", Google.Search.fields).set("key", secrets.key).set("num", 10).set("q", query);
 	}
 
 	protected getEmbed(item: Google.Search.Result.Item): Embed.Options {
@@ -76,6 +76,8 @@ export class Search extends Embeddable<Google.Search.Result.Item> implements Goo
 }
 
 export namespace Search {
+	export const fields: string = "items(image/contextLink,link,pagemap(cse_image/src,cse_thumbnail/src),snippet,title),searchInformation(formattedSearchTime,formattedTotalResults)";
+
 	export interface Like extends Embeddable.Like<Google.Search.Result.Item> {
 		searchInformation: Google.Search.Information;
 
@@ -93,13 +95,11 @@ export namespace Search {
 
 	export namespace Result {
 		export interface Item {
-			displayLink: string;
-			formattedUrl?: string;
 			image?: { contextLink?: string; }
 			link: string;
 			pagemap?: {
 				cse_image?: Array<Item.Image>;
-				cse_thumbnail?: Array<Item.Thumbnail>;
+				cse_thumbnail?: Array<Item.Image>;
 			};
 			snippet: string;
 			thumbnailUrl?: string;
@@ -108,11 +108,6 @@ export namespace Search {
 
 		export namespace Item {
 			export interface Image { src: string; }
-
-			export interface Thumbnail extends Image {
-				height: string;
-				width: string;
-			}
 
 			export function getThumbnailUrl(item: Item): Url {
 				if (item && item.pagemap)
@@ -126,9 +121,7 @@ export namespace Search {
 	}
 
 	export interface Information {
-		searchTime: number;
 		formattedSearchTime: string;
-		totalResults: string;
 		formattedTotalResults: string;
 	}
 

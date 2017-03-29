@@ -72,8 +72,7 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 
 ### To-do List
 
-- [ ] Add `images` command to search Google images (exact same API implementation as current [Google.Search](ts/Google/Search.ts), only with `searchType=image` added as a query parameter)
-- [ ] Modify the [Google.Search](ts/Google/Search.ts) API calls (and any other Google APIs that support it) to make use of the `files=` parameter in the request to reduce unnecessary data (https://developers.google.com/custom-search/json-api/v1/performance)
+- [ ] Modify the [Google.Search](ts/Google/Search.ts) API calls (and any other Google APIs that support it) to make use of the `fields=` parameter in the request to reduce unnecessary data (https://developers.google.com/custom-search/json-api/v1/performance)
 - [ ] Change all commands that fit the [Embeddable](ts/Embeddable.ts) profile to make use of the new abstract class; current candidates in process:
   - [ ] `4chan`
 - [ ] Eliminate use of old `RichEmbed` class defined within [Command.Defaults](ts/Command/Defaults.ts) in favor of my actual [RichEmbed](ts/RichEmbed.ts) implementation

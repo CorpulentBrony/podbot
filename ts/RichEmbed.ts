@@ -19,7 +19,6 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 			title: parsedCommand.command
 		}, options));
 		Object.defineProperty(this, "channel", { enumerable: false, value: parsedCommand.channel });
-		// this.channel = parsedCommand.channel;
 
 		if (options.video)
 			this["video"] = options.video;
@@ -29,10 +28,6 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 				embeds: { enumerable: false, value: embedsOrOptions },
 				index: { enumerable: false, value: 0, writable: true }
 			});
-			// [this.embeds, this.index] = [embedsOrOptions, 0];
-		
-		// Object.defineProperty(this, "embeds", { enumerable: false });
-		// Object.defineProperty(this, "index", { enumerable: false, writable: true });
 		Object.defineProperty(this, "message", { enumerable: false, writable: true });
 	}
 
