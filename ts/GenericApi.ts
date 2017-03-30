@@ -1,8 +1,11 @@
+import { Buffer } from "buffer";
+import * as Fs from "fs";
 import * as Http from "http";
 import * as Https from "https";
-import * as JSONStream from "JSONStream";
 import { Path, Query, Url } from "./Url";
+import * as Stream from "stream";
 import * as URL from "url";
+import * as Zlib from "zlib";
 
 export class GenericApi {
 	private agent: Https.Agent;
@@ -13,41 +16,51 @@ export class GenericApi {
 	constructor(hostname: string, useKeepAlive?: boolean, headers?: GenericApi.Headers);
 	constructor(urlOrHostname: string | Url, useKeepAlive: boolean = true, headers?: GenericApi.Headers, port: number = 443) {
 		this.url = (urlOrHostname instanceof Url) ? urlOrHostname : new Url({ hostname: urlOrHostname, port, protocol: "https:", slashes: true });
-		[this.agent, this.headers] = [new Https.Agent({ keepAlive: useKeepAlive }), useKeepAlive ? Object.assign(headers ? headers : {}, GenericApi.keepAliveHeader) : headers];
+		[this.agent, this.headers] = [new Https.Agent({ keepAlive: useKeepAlive }), Object.assign(useKeepAlive ? Object.assign(headers ? headers : {}, GenericApi.keepAliveHeader) : headers)];
 	}
 
-	private buildRequestOptions(method: GenericApi.Method, query?: Query): Https.RequestOptions { return Object.assign({ agent: this.agent, headers: this.headers, method }, this.url.setQuery(query).toNodeUrl()); }
+	private buildRequestOptions(method: GenericApi.Method, query?: Query): Https.RequestOptions {
+		return Object.assign({ agent: this.agent, headers: Object.assign(this.headers, GenericApi.defaultHeaders), method }, this.url.setQuery(query).toNodeUrl());
+	}
+
 	public async getJson<T>(query?: Query): Promise<T> { return this.processAsyncRequest<T>("GET", query); }
 
 	private async processAsyncRequest<T>(method: GenericApi.Method, query?: Query): Promise<T> {
 		return new Promise<T>((resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void): void => {
-			const options: Https.RequestOptions = this.buildRequestOptions(method, query);
-			Https.request(options, (result: Http.IncomingMessage): void => {
+			Https.request(this.buildRequestOptions(method, query), (response: Http.IncomingMessage): void => {
 				let error: Error;
 
-				if (result.statusCode === 304)
+				if (response.statusCode === 304)
 					resolve.call(this, undefined);
 
-				if (result.statusCode !== 200)
-					error = new Error("HTTPS request failed.  Status code: " + result.statusCode.toString());
-				else if (!/^application\/json/.test(result.headers["content-type"]))
-					error = new Error("Invalid content-type for HTTPS request.  Expected application/json but received " + result.headers["content-type"]);
+				if (response.statusCode !== 200)
+					error = new Error("HTTPS request failed.  Status code: " + response.statusCode.toString());
+				else if (!/^application\/json/.test(response.headers["content-type"]))
+					error = new Error("Invalid content-type for HTTPS request.  Expected application/json but received " + response.headers["content-type"]);
 
 				if (error) {
 					reject(error);
-					result.resume();
+					response.resume();
 					return;
 				}
-				let rawResults: string = "";
-				result.setEncoding("utf8");
-				result.on("data", (chunk: string): any => rawResults += chunk);
-				result.on("end", (): void => {
-					try {
-						resolve.call(this, JSON.parse(rawResults));
-					} catch (error) {
-						reject(error);
-					}
+				const finalize: Stream.PassThrough = new Stream.PassThrough();
+				let objectString: string = "";
+				finalize.on("data", (chunk: Buffer): void => { objectString += chunk.toString(); });
+				finalize.on("end", (): void => {
+					try { resolve.call(this, JSON.parse(objectString)); }
+					catch (err) { reject(err); }
 				});
+
+				switch (response.headers["content-encoding"]) {
+					case "gzip":
+						response.pipe(Zlib.createGunzip()).pipe(finalize);
+						break;
+					case "deflate":
+						response.pipe(Zlib.createInflate()).pipe(finalize);
+						break;
+					default:
+						response.pipe(finalize);
+				}
 			})
 			.on("error", reject)
 			.end();
@@ -58,13 +71,37 @@ export class GenericApi {
 class GenericApiError extends Error {}
 
 export namespace GenericApi {
+	type DefaultHeaders = Headers & { ["accept-encoding"]: string } & { ["user-agent"]: string };
 	export type Headers = { [key: string]: string };
 	export type Method = "GET" | "POST";
 
-	export const keepAliveHeader: Headers & { Connection: "keep-alive" } = { Connection: "keep-alive" };
+	const compressionHeader: Headers & { ["accept-encoding"]: "gzip, deflate" } = { ["accept-encoding"]: "gzip, deflate" };
+	export const keepAliveHeader: Headers & { connection: "keep-alive" } = { connection: "keep-alive" };
+	const userAgentHeader: Headers & { ["user-agent"]: string } = { ["user-agent"]: "" };
+	export let defaultHeaders: DefaultHeaders = Object.assign({ ["user-agent"]: `podbot/NOT_YET_CALCULATED (${process.platform}; ${process.arch}; deflate, gzip, zlib; +https://iwtcits.com) node/${process.version}` }, compressionHeader);
+	let defaultHeadersSet: boolean = false;
 
 	export class Error extends GenericApiError {}
 	export class RequestError extends Error {}
+
+	async function getVersion(): Promise<string> {
+		const cwd: Path = new Path(process.cwd());
+		const result: string = await new Promise<string>((resolve: (value: string | PromiseLike<string>) => void, reject: (reason?: any) => void): void => {
+			Fs.readFile(cwd.join(".git/refs/heads/master").toString(), { encoding: "utf8" }, (error: Error, data: string): void => {
+				if (error)
+					reject(error);
+				resolve(data);
+			})
+		});
+		return result.trim();
+	}
+
+	async function setDefaultHeaders() {
+		if (defaultHeadersSet)
+			return;
+		defaultHeaders["user-agent"] = defaultHeaders["user-agent"].replace(/NOT_YET_CALCULATED/g, await getVersion());
+		defaultHeadersSet = true;
+	}
 
 	export namespace Cache {
 		const agentCache: Map<boolean, Https.Agent> = new Map<boolean, Https.Agent>();
@@ -83,4 +120,6 @@ export namespace GenericApi {
 			return request.getJson<T>(query);
 		}
 	}
+
+	setDefaultHeaders().catch(console.error);
 }
