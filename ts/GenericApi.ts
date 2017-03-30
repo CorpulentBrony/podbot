@@ -7,6 +7,15 @@ import * as Stream from "stream";
 import * as URL from "url";
 import * as Zlib from "zlib";
 
+// should be "deflate", "gzip", "deflate, gzip", or "identity"; this is sent as accept-encoding with http request
+const ACCEPT_ENCODING: string = "deflate, gzip";
+const APP_NAME: string = "podbot";
+const APP_URL: string = "https://iwtcits.com";
+// file that stores a version reference for the app (must be given in relation to app location and should be utf8 encoded)
+const APP_VERSION_FILE: string = ".git/refs/heads/master";
+// this is sent as user-agent with the http request.  the text "NOT_YET_CALCULATED" will be replaced with the app version
+const DEFAULT_USER_AGENT: string = `${APP_NAME}/NOT_YET_CALCULATED (${process.platform}; ${process.arch}; ${ACCEPT_ENCODING}; +${APP_URL}) node/${process.version}`;
+
 export class GenericApi {
 	private agent: Https.Agent;
 	private headers: { [key: string]: string };
@@ -16,7 +25,7 @@ export class GenericApi {
 	constructor(hostname: string, useKeepAlive?: boolean, headers?: GenericApi.Headers);
 	constructor(urlOrHostname: string | Url, useKeepAlive: boolean = true, headers?: GenericApi.Headers, port: number = 443) {
 		this.url = (urlOrHostname instanceof Url) ? urlOrHostname : new Url({ hostname: urlOrHostname, port, protocol: "https:", slashes: true });
-		[this.agent, this.headers] = [new Https.Agent({ keepAlive: useKeepAlive }), Object.assign(useKeepAlive ? Object.assign(headers ? headers : {}, GenericApi.keepAliveHeader) : headers)];
+		[this.agent, this.headers] = [new Https.Agent({ keepAlive: useKeepAlive }), useKeepAlive ? Object.assign(headers ? headers : {}, GenericApi.keepAliveHeader) : headers];
 	}
 
 	private buildRequestOptions(method: GenericApi.Method, query?: Query): Https.RequestOptions {
@@ -75,10 +84,9 @@ export namespace GenericApi {
 	export type Headers = { [key: string]: string };
 	export type Method = "GET" | "POST";
 
-	const compressionHeader: Headers & { ["accept-encoding"]: "gzip, deflate" } = { ["accept-encoding"]: "gzip, deflate" };
+	const compressionHeader: Headers & { ["accept-encoding"]: string } = { ["accept-encoding"]: ACCEPT_ENCODING };
 	export const keepAliveHeader: Headers & { connection: "keep-alive" } = { connection: "keep-alive" };
-	const userAgentHeader: Headers & { ["user-agent"]: string } = { ["user-agent"]: "" };
-	export let defaultHeaders: DefaultHeaders = Object.assign({ ["user-agent"]: `podbot/NOT_YET_CALCULATED (${process.platform}; ${process.arch}; deflate, gzip, zlib; +https://iwtcits.com) node/${process.version}` }, compressionHeader);
+	export let defaultHeaders: DefaultHeaders = Object.assign({ ["user-agent"]: DEFAULT_USER_AGENT }, compressionHeader);
 	let defaultHeadersSet: boolean = false;
 
 	export class Error extends GenericApiError {}
@@ -87,7 +95,7 @@ export namespace GenericApi {
 	async function getVersion(): Promise<string> {
 		const cwd: Path = new Path(process.cwd());
 		const result: string = await new Promise<string>((resolve: (value: string | PromiseLike<string>) => void, reject: (reason?: any) => void): void => {
-			Fs.readFile(cwd.join(".git/refs/heads/master").toString(), { encoding: "utf8" }, (error: Error, data: string): void => {
+			Fs.readFile(cwd.join(APP_VERSION_FILE).toString(), { encoding: "utf8" }, (error: Error, data: string): void => {
 				if (error)
 					reject(error);
 				resolve(data);

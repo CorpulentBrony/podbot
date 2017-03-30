@@ -11,7 +11,7 @@ export class GenericBot implements GenericBot.Like {
 
 	constructor(name: string, token: string, { commands, onReady, trigger }: GenericBot.Options) {
 		console.log("starting up...");
-		process.title = "podbot - " + name;
+		process.title = "podbot: " + name;
 		[this.name, this.client, this.reactor, this.token] = [name, new Discord.Client({ disabledEvents: ["TYPING_START"] }), new Reactor(this), token];
 		this.command = new GenericBot.Command(this, { commands, trigger });
 	}
