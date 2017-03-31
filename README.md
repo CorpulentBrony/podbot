@@ -9,7 +9,7 @@
 
 ## **_notices your bot_**
 
-## OwO What's this?
+## OwO what's this?
 
 `podbot` is a [Discord](https://discordapp.com/) bot written in [TypeScript](https://www.typescriptlang.org/) designed to transpile to [ECMAScript 2017](https://developer.mozilla.org/en-US/docs/Web/JavaScript/New_in_JavaScript/ECMAScript_Next_support_in_Mozilla) code and to run on [Node.js 7.7](https://nodejs.org/). It currently supports running multiple bots concurrently through relatively simple configuration (this may become easier in the future). It leverages the [discord.js](https://discord.js.org/) API.
 
@@ -50,7 +50,9 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 	<code>topic <var>topic</var></code>
 	<dd>This command will reformat and re-state <var>topic</var>, pin that new message to the active channel, and remove the original message.  This is intended to making pinning topics to the <code>#podcast</code> channel on PFC easier and, as such, will only work if the channel's name is either <code>#podcast</code> or <code>#bot-fuckery</code>.</dd>
 </dl>
-#### Features
+
+#### Other implemented non-command features for PFC
+
 <ul>
 	<li>The bot will query the PFC YouTube channel once every 30 seconds looking for a newly uploaded video.  If one is found, then it will be posted to the #pfc text channel.</li>
 	<li>When a new user joins the guild, the bot will automatically assign them a role.</li>
@@ -72,14 +74,11 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 
 ### To-do List
 
-- [ ] Modify the [Google.Search](ts/Google/Search.ts) API calls (and any other Google APIs that support it) to make use of the `fields=` parameter in the request to reduce unnecessary data (https://developers.google.com/custom-search/json-api/v1/performance)
 - [ ] Change all commands that fit the [Embeddable](ts/Embeddable.ts) profile to make use of the new abstract class; current candidates in process:
   - [ ] `4chan`
 - [ ] Eliminate use of old `RichEmbed` class defined within [Command.Defaults](ts/Command/Defaults.ts) in favor of my actual [RichEmbed](ts/RichEmbed.ts) implementation
 - [ ] Do some sort of `stats` command, or something that queries mongo and returns the person who issues the most commands or the most used commands or both
 - [ ] Maybe a `weather` command?
-- [ ] Add support in [GenericApi](ts/GenericApi.ts) for sending/receiving gzip encoded http requests (http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression)
-- [ ] Move more of the duplicate code in [pfc](ts/pfc.ts) and [plush](ts/plush.ts) to [BotExecutor](ts/BotExecutor.ts)
 - [ ] Set up some more versatile communication between [BotExecutor](ts/BotExecutor.ts) and the bot files ([pfc](ts/pfc.ts) and [plush](ts/plush.ts))
   - Perhaps by establishing some sort of timer on [BotExecutor](ts/BotExecutor.ts) that queries the bot file itself occasionally to prevent random issues where the child process will die without notifications, or when the child will disconnect and not try reconnecting
   -  Maybe the bot files themselves should be abstracted to a higher class?  May make configuring new bots easier
@@ -91,7 +90,28 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 I mean, this really isn't meant for distribution, but if you insist:
 
 1.  Get a Discord API key for a bot by following [these instructions](https://discordapp.com/developers/applications/me).
-2.  Configure a `bot.ts` file like I have done for [`pfc.ts`](ts/pfc.ts) and [`plush.ts`](ts/plush.ts).
+2.  Configure a `bot.ts` file like I have done for [`pfc.ts`](ts/pfc.ts) and [`plush.ts`](ts/plush.ts).  Here's a generic example:
+```javascript
+import { GenericBot } from "Path/To/GenericBot";
+
+const name: string = "MyBotsName";
+const trigger: string = "!";
+
+const commands: GenericBot.Command.Collection = new GenericBot.Command.Collection();
+commands.set("4chan", { default: true })
+	.set("db", { default: true })
+	.set("dp", { alias: "db" })
+	.set("google", { default: true })
+	.set("image", { default: true })
+	.set("images", { alias: "image" })
+	.set("ping", { default: true })
+	.set("regind", { default: true })
+	.set("say", { default: true })
+	.set("uptime", { default: true })
+	.set("yt", { default: true });
+const bot: GenericBot = new GenericBot(name, { commands, trigger });
+bot.configure().login().catch(console.error);
+```
 3.  Modify the [`Crypt.ts`](ts/Crypt.ts) file.
     -   Set the `secretsDirectory` Path to the top level directory.
     -   Add or remove entries from `botFiles` object to correspond with your bot names.

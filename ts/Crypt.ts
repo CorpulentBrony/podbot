@@ -15,7 +15,7 @@ const keyFile: Path = new Path("/home/corpubro/.ssh/id_rsa");
 const secretsAllFile: Path = secretsDirectory.join(".secrets_all.json");
 const youTubeSubscriberFile: Path = secretsDirectory.join(".secrets_youtubesubscriber");
 
-type Bots = "pfc" | "plush";
+type Bots = string;
 
 interface SecretsAll {
 	Google: SecretsGoogle;

@@ -2,9 +2,9 @@ import { Buffer } from "buffer";
 import * as Fs from "fs";
 import * as Http from "http";
 import * as Https from "https";
-import { Path, Query, Url } from "./Url";
+import * as Process from "process";
 import * as Stream from "stream";
-import * as URL from "url";
+import { Path, Query, Url } from "./Url";
 import * as Zlib from "zlib";
 
 // should be "deflate", "gzip", "deflate, gzip", or "identity"; this is sent as accept-encoding with http request
@@ -14,7 +14,7 @@ const APP_URL: string = "https://iwtcits.com";
 // file that stores a version reference for the app (must be given in relation to app location and should be utf8 encoded)
 const APP_VERSION_FILE: string = ".git/refs/heads/master";
 // this is sent as user-agent with the http request.  the text "NOT_YET_CALCULATED" will be replaced with the app version
-const DEFAULT_USER_AGENT: string = `${APP_NAME}/NOT_YET_CALCULATED (${process.platform}; ${process.arch}; ${ACCEPT_ENCODING}; +${APP_URL}) node/${process.version}`;
+const DEFAULT_USER_AGENT: string = `${APP_NAME}/NOT_YET_CALCULATED (${Process.platform}; ${Process.arch}; ${ACCEPT_ENCODING}; +${APP_URL}) node/${Process.version}`;
 
 export class GenericApi {
 	private agent: Https.Agent;
@@ -93,7 +93,7 @@ export namespace GenericApi {
 	export class RequestError extends Error {}
 
 	async function getVersion(): Promise<string> {
-		const cwd: Path = new Path(process.cwd());
+		const cwd: Path = new Path(Process.cwd());
 		const result: string = await new Promise<string>((resolve: (value: string | PromiseLike<string>) => void, reject: (reason?: any) => void): void => {
 			Fs.readFile(cwd.join(APP_VERSION_FILE).toString(), { encoding: "utf8" }, (error: Error, data: string): void => {
 				if (error)

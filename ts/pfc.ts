@@ -1,8 +1,5 @@
-import { CommandLogger } from "./CommandLogger";
-import * as Crypt from "./Crypt";
 import * as Discord from "discord.js";
 import { GenericBot } from "./GenericBot";
-import * as Process from "process";
 import { Path } from "./Url";
 import { YouTube } from "./YouTube";
 
@@ -13,11 +10,8 @@ const selfiesRoleSnowflake: string = "292882948460511238";
 const topicPrefix: string = "PODCAST TOPIC";
 const trigger: string = "!";
 
-Process.send({ name });
-const log: CommandLogger = new CommandLogger("podbot");
 const commands: GenericBot.Command.Collection = new GenericBot.Command.Collection();
-commands.set("any", { command: (parsedCommand: GenericBot.Command.Parser.ParsedCommand): void => { log.add(parsedCommand).catch(console.error); } })
-	.set("4chan", { default: true })
+commands.set("4chan", { default: true })
 	.set("db", { default: true })
 	.set("dp", { alias: "db" })
 	.set("google", { default: true })
@@ -30,17 +24,10 @@ commands.set("any", { command: (parsedCommand: GenericBot.Command.Parser.ParsedC
 	.set("topic", { command: (parsedCommand: GenericBot.Command.Parser.ParsedCommand): void => { topic(parsedCommand).catch(console.error); } })
 	.set("uptime", { default: true })
 	.set("yt", { default: true });
-let bot: GenericBot;
-
-async function login() {
-	const secrets: Crypt.SecretsBot = await Crypt.getSecrets("pfc");
-	bot = new GenericBot(name, secrets.token, { commands, trigger });
-	bot.client.on("guildMemberAdd", (member: Discord.GuildMember): void => { member.addRole(newMemberDefaultRoleSnowflake).catch(console.error) });
-	bot.client.on("message", (message: Discord.Message): void => { onMessage(message).catch(console.error) });
-	bot.configure().login();
-}
-
-login().catch(console.error);
+const bot: GenericBot = new GenericBot(name, { commands, trigger });
+bot.client.on("guildMemberAdd", (member: Discord.GuildMember): void => { member.addRole(newMemberDefaultRoleSnowflake).catch(console.error) });
+bot.client.on("message", (message: Discord.Message): void => { onMessage(message).catch(console.error) });
+bot.configure().login().catch(console.error);
 
 async function onMessage(message: Discord.Message): Promise<void> {
 	if (message.member && message.member.roles.has(selfiesRoleSnowflake) && message.attachments.size > 0) {
