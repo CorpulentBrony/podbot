@@ -1,3 +1,4 @@
+import * as console from "console";
 import * as Discord from "discord.js";
 import { GenericBot } from "./GenericBot";
 import { Path } from "./Url";

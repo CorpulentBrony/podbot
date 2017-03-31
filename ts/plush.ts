@@ -1,3 +1,4 @@
+import * as console from "console";
 import * as Discord from "discord.js";
 import * as FourChan from "./FourChan";
 import { GenericBot } from "./GenericBot";

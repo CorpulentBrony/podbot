@@ -1,13 +1,15 @@
-abstract class Foo {
-	public readonly test: string = "hello from Foo";
+import { Path } from "./Path";
 
-	public funTimes() { console.log(this.test); }
+let fubar: Path;
+
+async function fooo() {
+	fubar = new Path("./test.js");
+	console.log(await fubar.exists());
+	console.log(await fubar.isReadable());
+
+	fubar = new Path("/fakefile");
+	console.log(await fubar.exists());
+	console.log(await fubar.isReadable());
 }
 
-class Bar extends Foo {
-	public get test(): string { return "hello from Bar"; }
-}
-
-const bar = new Bar();
-console.log(bar.test);
-bar.funTimes();
+fooo();

@@ -79,9 +79,6 @@ I created this bot initially just to provide some basic commands for the [PFC Di
 - [ ] Eliminate use of old `RichEmbed` class defined within [Command.Defaults](ts/Command/Defaults.ts) in favor of my actual [RichEmbed](ts/RichEmbed.ts) implementation
 - [ ] Do some sort of `stats` command, or something that queries mongo and returns the person who issues the most commands or the most used commands or both
 - [ ] Maybe a `weather` command?
-- [ ] Set up some more versatile communication between [BotExecutor](ts/BotExecutor.ts) and the bot files ([pfc](ts/pfc.ts) and [plush](ts/plush.ts))
-  - Perhaps by establishing some sort of timer on [BotExecutor](ts/BotExecutor.ts) that queries the bot file itself occasionally to prevent random issues where the child process will die without notifications, or when the child will disconnect and not try reconnecting
-  -  Maybe the bot files themselves should be abstracted to a higher class?  May make configuring new bots easier
 - [ ] To solve random disconnection issues, or at least mitigate the length of disconnection, perhaps reset the bot's connection (kill/restart) every day or so?
 - [ ] Convert the [README.md](README.md) file back to a HTML file?  I hate md
 
