@@ -1,15 +1,7 @@
-import { Path } from "./Path";
+import { Time } from "./Time";
 
-let fubar: Path;
-
-async function fooo() {
-	fubar = new Path("./test.js");
-	console.log(await fubar.exists());
-	console.log(await fubar.isReadable());
-
-	fubar = new Path("/fakefile");
-	console.log(await fubar.exists());
-	console.log(await fubar.isReadable());
-}
-
-fooo();
+let fubar: Time = new Time("16:58:28.165Z");
+let formatter: Intl.TimeFormat = new Intl.TimeFormat();
+console.log(formatter.format(fubar));
+formatter = new Intl.TimeFormat(undefined, { timeZone: "America/New_York" });
+console.log(formatter.format(fubar));

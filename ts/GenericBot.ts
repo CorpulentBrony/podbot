@@ -10,6 +10,9 @@ import { Reactor } from "./Reactor";
 // these names should really be standardized, but until they are i'll be using this to connect the bot's actual names with the ones used in Crypt
 const CRYPT_LOOKUP: Map<string, string> = new Map<string, string>();
 CRYPT_LOOKUP.set("PFCuckBot", "pfc").set("PlushieBot", "plush");
+// bot will reconnect starting at FORCE_RECONNECT_TIME and will continue every FORCE_RECONNECT_HOURS after
+const FORCE_RECONNECT_HOURS: number = 24;
+const FORCE_RECONNECT_TIME: string = ""
 // cached messages will be guaranteed up to an age of MESSAGE_LIFETIME_MINUTES; messages *might* be cached between MESSAGE_LIFETIME_MINUTES and 2 * MESSAGE_LIFETIME_MINUTES
 const MESSAGE_LIFETIME_MINUTES: number = 30;
 
@@ -81,7 +84,6 @@ export class GenericBot implements GenericBot.Like {
 
 	private sweepMessages(): void {
 		this.client.sweepMessages(GenericBot.messageLifetimeSeconds);
-		console.log("sweeping messages");
 		this.setSweepMessagesTimer();
 	}
 }
