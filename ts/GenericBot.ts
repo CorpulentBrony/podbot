@@ -6,15 +6,19 @@ import * as Discord from "discord.js";
 import * as Net from "net";
 import * as Process from "process";
 import { Reactor } from "./Reactor";
+import { Time } from "./Time";
 
 // these names should really be standardized, but until they are i'll be using this to connect the bot's actual names with the ones used in Crypt
 const CRYPT_LOOKUP: Map<string, string> = new Map<string, string>();
 CRYPT_LOOKUP.set("PFCuckBot", "pfc").set("PlushieBot", "plush");
-// bot will reconnect starting at FORCE_RECONNECT_TIME and will continue every FORCE_RECONNECT_HOURS after
+// bot will reconnect starting at FORCE_RECONNECT_TIME (in local server time) and will continue every FORCE_RECONNECT_HOURS after
 const FORCE_RECONNECT_HOURS: number = 24;
-const FORCE_RECONNECT_TIME: string = ""
+const FORCE_RECONNECT_TIME: string = "07:00";
 // cached messages will be guaranteed up to an age of MESSAGE_LIFETIME_MINUTES; messages *might* be cached between MESSAGE_LIFETIME_MINUTES and 2 * MESSAGE_LIFETIME_MINUTES
 const MESSAGE_LIFETIME_MINUTES: number = 30;
+
+// in Time create new method to calculate time diff
+// maybe create object like Time.Dimensions, with hours, minutes, seconds, milliseconds, and have Time implement it with getters, and the new function can have an arg that will be keysof Time.Dimensions or something
 
 declare namespace NodeJS {
 	export interface Timer {
@@ -79,11 +83,11 @@ export class GenericBot implements GenericBot.Like {
 	private setSweepMessagesTimer(multiplier: number = 1): void {
 		if (this.sweepMessagesTimer)
 			this.client.clearTimeout(this.sweepMessagesTimer);
-		this.sweepMessagesTimer = this.client.setTimeout((): void => this.sweepMessages(), GenericBot.messageLifetimeSeconds * multiplier * 1000);
+		this.sweepMessagesTimer = this.client.setTimeout((): void => this.sweepMessages(), GenericBot.messageLifetimeMilliseconds * multiplier);
 	}
 
 	private sweepMessages(): void {
-		this.client.sweepMessages(GenericBot.messageLifetimeSeconds);
+		this.client.sweepMessages(GenericBot.messageLifetimeMilliseconds);
 		this.setSweepMessagesTimer();
 	}
 }
@@ -101,6 +105,9 @@ export namespace GenericBot {
 		configure(): this;
 		login();
 	} export declare const Like: Function | {
+		readonly forceReconnectMilliseconds: number;
+		readonly forceReconnectTime: Time;
+		readonly messageLifetimeMilliseconds: number;
 		prototype: Like;
 
 		new(name: string, options: GenericBot.Options): Like;
@@ -110,5 +117,7 @@ export namespace GenericBot {
 
 	export interface Options extends Command.Options { onReady?: () => void }
 
-	export const messageLifetimeSeconds: number = MESSAGE_LIFETIME_MINUTES * 60;
+	export const forceReconnectMilliseconds: number = FORCE_RECONNECT_HOURS * Time.MillisecondsIn.Hour;
+	export const forceReconnectTime: Time = new Time(FORCE_RECONNECT_TIME);
+	export const messageLifetimeMilliseconds: number = MESSAGE_LIFETIME_MINUTES * Time.MillisecondsIn.Minute;
 }

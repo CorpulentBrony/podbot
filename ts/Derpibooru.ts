@@ -12,14 +12,20 @@ const BASE_URL: string = "https://derpibooru.org";
 const FAVICON_PATH: string = "/favicon.ico";
 const FILTER_ID: number = 56027;
 
+// this should be moved probably to somewhere else, but for now...
+import * as Discord from "discord.js";
+function isTextChannel(channel: Discord.Channel): channel is Discord.TextChannel { return channel.type === "text"; }
+
 export class NoponyError extends Error {}
 
 export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpibooru.Like {
 	private _results: Array<Derpibooru.Image>;
+	private readonly isNsfw: boolean;
 	public readonly type: "random" | "search";
 
 	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand) {
 		super(parsedCommand);
+		this.isNsfw = !isTextChannel(parsedCommand.channel) || parsedCommand.channel.name.startsWith("nsfw-");
 		this.type = (this.userInput === "" || this.userInput === "random") ? "random" : "search";
 	}
 
@@ -56,10 +62,13 @@ export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpiboo
 		this.query.set("filter_id", Derpibooru.filterId).delete("page");
 
 		if (this.type === "search")
-			this.query.set("q", this.userInput.replace(/best pony/g, "twilight sparkle"));
+			this.query.set("q", this.makeSafe(this.fixBestPony(this.userInput)));
 		else
 			this.query.set("random_image", true);
 	}
+
+	protected fixBestPony(query: string): string { return query.replace(/best pony/g, "twilight sparkle"); }
+	protected makeSafe(query: string): string { return query.concat(!this.isNsfw ? ",safe" : ""); }
 
 	public async search() {
 		let images: Array<Derpibooru.Response.Image>;

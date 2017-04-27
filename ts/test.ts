@@ -1,7 +1,7 @@
 import { Time } from "./Time";
 
-let fubar: Time = new Time("16:58:28.165Z");
-let formatter: Intl.TimeFormat = new Intl.TimeFormat();
-console.log(formatter.format(fubar));
-formatter = new Intl.TimeFormat(undefined, { timeZone: "America/New_York" });
-console.log(formatter.format(fubar));
+let foo: Time = new Time("09:00");
+let bar: Time = new Time("15:00");
+
+console.log(Time.Duration.from({ from: foo, to: bar }).time);
+console.log(Time.Duration.from({ from: bar, to: foo }).time);
