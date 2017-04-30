@@ -10,7 +10,7 @@ import { RichEmbed as NewRichEmbed } from "../RichEmbed";
 import { YouTube } from "../YouTube";
 
 export class Defaults {
-	public static async ["4chan"](parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> { return Defaults.fourChan(parsedCommand); }
+	public static async ["4chan"](parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message | Array<Discord.Message>> { return Defaults.fourChan(parsedCommand); }
 }
 
 export namespace Defaults {
@@ -63,7 +63,7 @@ export namespace Defaults {
 		return embed.message;
 	}
 
-	export async function fourChan(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
+	export async function fourChan(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message | Array<Discord.Message>> {
 		let result: FourChan.Catalog.Response.Thread;
 
 		try {
@@ -86,7 +86,7 @@ export namespace Defaults {
 		const comment: string = FourChan.formatPostComment(result);
 		message.addField("by " + result.name, (comment.length > 1024) ? comment.slice(0, 1024).concat("\u{2026}") : comment, false);
 		message.setThumbnail(FourChan.formatPostImage(result));
-		return parsedCommand.channel.sendEmbed(message, undefined, { split: true });
+		return parsedCommand.channel.send(undefined, { embed: message, split: true });
 	}
 
 	export async function google(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
@@ -121,7 +121,7 @@ export namespace Defaults {
 
 	function isBotOrDmChannel(channel: GenericBot.Command.TextBasedChannel): boolean { return channel instanceof Discord.DMChannel || channel instanceof Discord.GroupDMChannel || channel instanceof Discord.TextChannel && /bot/gi.test(channel.name); }
 
-	export async function ping(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
+	export async function ping(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message | Array<Discord.Message>> {
 		if (isBotOrDmChannel(parsedCommand.message.channel))
 			return sayEmbed(parsedCommand, {
 				description: "Response took: " + DateFormatted.fromTimestamp(Date.now() - parsedCommand.message.createdTimestamp).format() + "; average socket ping: " + DateFormatted.fromTimestamp(parsedCommand.bot.client.ping).format(),
@@ -137,12 +137,12 @@ export namespace Defaults {
 
 	export async function say(parsedCommand: GenericBot.Command.Parser.ParsedCommand, message?: string): Promise<Discord.Message> { return <Promise<Discord.Message>>parsedCommand.channel.send(message ? message : parsedCommand.args); }
 
-	export async function sayEmbed(parsedCommand: GenericBot.Command.Parser.ParsedCommand, options: SayEmbedOptions): Promise<Discord.Message> {
+	export async function sayEmbed(parsedCommand: GenericBot.Command.Parser.ParsedCommand, options: SayEmbedOptions): Promise<Discord.Message | Array<Discord.Message>> {
 		const embedMessage: RichEmbed = new RichEmbed((options.author) ? options : Object.assign(options, { author: parsedCommand.requester }));
-		return parsedCommand.channel.sendEmbed(embedMessage, undefined, { split: true });
+		return parsedCommand.channel.send(undefined, { embed: embedMessage, split: true });
 	}
 
-	export async function uptime(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
+	export async function uptime(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message | Array<Discord.Message>> {
 		if (!isBotOrDmChannel(parsedCommand.channel))
 			return null;
 		const now: Date = new Date();

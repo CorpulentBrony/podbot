@@ -8,6 +8,8 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 	public index: number;
 	public message: Discord.Message;
 
+	private static forceSingleMessage(message: Discord.Message | Array<Discord.Message>): Discord.Message { return Array.isArray(message) ? message[0] : message; }
+
 	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand, embeds: Array<RichEmbed.Options>);
 	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand, options?: RichEmbed.Options);
 	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand, embedsOrOptions: Array<RichEmbed.Options> | RichEmbed.Options = {}) {
@@ -38,7 +40,7 @@ export class RichEmbed extends Discord.RichEmbed implements RichEmbed.Like {
 	public async send(): Promise<Discord.Message> {
 		if (this["video"] && this["video"].url)
 			return this.message = <Discord.Message>await this.channel.send(this["video"].url);
-		return this.message = await this.channel.sendEmbed(this, undefined, { split: true });
+		return this.message = RichEmbed.forceSingleMessage(await this.channel.send(undefined, { embed: this, split: true }));
 	}
 
 	public set(index: number): this {

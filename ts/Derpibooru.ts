@@ -1,4 +1,5 @@
 import { Collection } from "./Collection";
+import * as DiscordTypeChecks from "./DiscordTypeChecks";
 import { Embeddable } from "./Embeddable";
 import { GenericApi } from "./GenericApi";
 import { GenericBot } from "./GenericBot";
@@ -12,10 +13,6 @@ const BASE_URL: string = "https://derpibooru.org";
 const FAVICON_PATH: string = "/favicon.ico";
 const FILTER_ID: number = 56027;
 
-// this should be moved probably to somewhere else, but for now...
-import * as Discord from "discord.js";
-function isTextChannel(channel: Discord.Channel): channel is Discord.TextChannel { return channel.type === "text"; }
-
 export class NoponyError extends Error {}
 
 export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpibooru.Like {
@@ -25,7 +22,7 @@ export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpiboo
 
 	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand) {
 		super(parsedCommand);
-		this.isNsfw = !isTextChannel(parsedCommand.channel) || parsedCommand.channel.name.startsWith("nsfw-");
+		this.isNsfw = DiscordTypeChecks.isNsfwChannel(parsedCommand.channel);
 		this.type = (this.userInput === "" || this.userInput === "random") ? "random" : "search";
 	}
 

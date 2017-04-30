@@ -38,15 +38,19 @@ async function onMessage(message: Discord.Message): Promise<void> {
 	}
 }
 
-async function topic(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
+async function topic(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message | Array<Discord.Message>> {
 	if (!(parsedCommand.channel instanceof Discord.TextChannel) || parsedCommand.channel.name !== "podcast" && parsedCommand.channel.name !== "bot-fuckery")
 		return null;
-	const messageToPin: Discord.Message = await GenericBot.Command.Defaults.sayEmbed(parsedCommand, {
+	const messageToPin: Discord.Message | Array<Discord.Message> = await GenericBot.Command.Defaults.sayEmbed(parsedCommand, {
 		description: parsedCommand.args,
 		footer: "\u{1f4cc}",
 		title: topicPrefix
 	});
-	messageToPin.pin();
+
+	if (Array.isArray(messageToPin))
+		messageToPin.forEach((message: Discord.Message): void => { message.pin(); });
+	else
+		messageToPin.pin();
 	parsedCommand.message.delete();
 	return messageToPin;
 }

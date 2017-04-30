@@ -18,7 +18,7 @@ commands.set("4chan", { default: true })
 const bot: GenericBot = new GenericBot(name, { commands, trigger });
 bot.configure().login().catch(console.error);
 
-async function thread(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
+async function thread(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message | Array<Discord.Message>> {
 	let result: FourChan.Catalog.Response.Thread;
 
 	try {
@@ -53,5 +53,5 @@ async function thread(parsedCommand: GenericBot.Command.Parser.ParsedCommand): P
 			throw e;
 	}
 	parsedCommand.message.delete();
-	return parsedCommand.channel.sendEmbed(message, undefined, { split: true });
+	return parsedCommand.channel.send(undefined, { embed: message, split: true });
 }

@@ -1,7 +1,7 @@
 {
   "files": "/var/www/podbot/",
   "name": "podbot",
-  "version": "0.1",
+  "version": "1.0.0",
   "description": "Just another Discord bot, not very customizable.  Written in TypeScript for ES6 output on node.js",
   "keywords": [
     "discord",
@@ -30,6 +30,7 @@
   },
   "private": true,
   "dependencies": {
+    "@types/node": ">=7.0.14",
     "bufferutil": ">=2.0.1",
     "discord.js": "github:hydrabolt/discord.js#master",
     "erlpack": "github:hammerandchisel/erlpack#master",
@@ -42,7 +43,5 @@
     "pubsubhubbub": ">=0.4.1",
     "sodium": ">=2.0.1",
     "typescript": "next",
-    "typings": ">=1",
-    "uws": ">=0.13.0"
-  }
+    "typings": ">=2.1.1"  }
 }
