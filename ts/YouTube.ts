@@ -1,3 +1,4 @@
+import * as DiscordTypeChecks from "./DiscordTypeChecks";
 import { Embeddable } from "./Embeddable";
 import { GenericApi } from "./GenericApi";
 import { GenericBot } from "./GenericBot";
@@ -11,6 +12,12 @@ const YOUTUBE_API_SEARCH_PATH: string = "search";
 
 export class YouTube extends Embeddable<YouTube.Response.ItemUrls> implements YouTube.Like {
 	private _results: Array<YouTube.Response.ItemUrls>;
+	private readonly isNsfw: boolean;
+
+	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand) {
+		super(parsedCommand);
+		this.isNsfw = DiscordTypeChecks.isNsfwChannel(parsedCommand.channel);
+	}
 
 	public get embeds(): Array<Embed.Options> {
 		if (!this.results)
@@ -48,7 +55,7 @@ export class YouTube extends Embeddable<YouTube.Response.ItemUrls> implements Yo
 		}));
 	}
 
-	protected async configureQuery(query: string) { this.query.set("maxResults", 50).set("part", "snippet").set("q", query).set("safeSearch", "none").set("type", "video").set("key", await Google.getKey()); }
+	protected async configureQuery(query: string) { this.query.set("maxResults", 50).set("part", "snippet").set("q", query).set("safeSearch", this.isNsfw ? "none" : "strict").set("type", "video").set("key", await Google.getKey()); }
 
 	public async search(query: string = this.userInput) {
 		if (!query || query === "")
