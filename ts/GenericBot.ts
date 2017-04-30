@@ -30,15 +30,16 @@ declare namespace NodeJS {
 export class GenericBot implements GenericBot.Like {
 	public readonly client: Discord.Client;
 	public readonly command: GenericBot.Command;
+	public readonly game: string;
 	private readonly log: CommandLogger;
 	public readonly name: string;
 	public readonly reactor: Reactor;
 	private sweepMessagesTimer: NodeJS.Timer;
 
-	constructor(name: string, { commands, onReady, trigger }: GenericBot.Options) {
+	constructor(name: string, { commands, game, onReady, trigger }: GenericBot.Options) {
 		Process.send({ name });
 		console.log("starting up...");
-		[this.name, this.client, this.reactor] = [name, new Discord.Client({ disabledEvents: ["TYPING_START"] }), new Reactor(this)];
+		[this.game, this.name, this.client, this.reactor] = [game, name, new Discord.Client({ disabledEvents: ["TYPING_START"] }), new Reactor(this)];
 		this.log = new CommandLogger(this.name);
 		commands.set("any", { command: (parsedCommand: GenericBot.Command.Parser.ParsedCommand): void => { this.log.add(parsedCommand).catch(console.error); } });
 		this.command = new GenericBot.Command(this, { commands, trigger });
@@ -77,7 +78,11 @@ export class GenericBot implements GenericBot.Like {
 			Process.send({ pong: Date.now() });
 	}
 
-	private onReady(): void { console.log("My circuits are ready~~~"); }
+	private onReady(): void {
+		this.client.user.setGame(this.game);
+		console.log("My circuits are ready~~~");
+	}
+
 	private onReconnecting(): void { console.log("Reconnecting to server..."); }
 
 	private setSweepMessagesTimer(multiplier: number = 1): void {
@@ -115,7 +120,10 @@ export namespace GenericBot {
 
 	export import Command = GenericBotCommand;
 
-	export interface Options extends Command.Options { onReady?: () => void }
+	export interface Options extends Command.Options {
+		game?: string;
+		onReady?: () => void;
+	}
 
 	export const forceReconnectMilliseconds: number = FORCE_RECONNECT_HOURS * Time.MillisecondsIn.Hour;
 	export const forceReconnectTime: Time = new Time(FORCE_RECONNECT_TIME);

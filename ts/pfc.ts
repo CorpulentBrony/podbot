@@ -5,6 +5,7 @@ import { Path } from "./Url";
 import { YouTube } from "./YouTube";
 
 const beaverSnowflake: string = "201717735900708866";
+const game: string = "be the biggest cuck";
 const name: string = "PFCuckBot";
 const newMemberDefaultRoleSnowflake: string = "161186606198423553";
 const selfiesRoleSnowflake: string = "292882948460511238";
@@ -24,7 +25,7 @@ commands.set("4chan", { default: true })
 	.set("topic", { command: (parsedCommand: GenericBot.Command.Parser.ParsedCommand): void => { topic(parsedCommand).catch(console.error); } })
 	.set("uptime", { default: true })
 	.set("yt", { default: true });
-const bot: GenericBot = new GenericBot(name, { commands, trigger });
+const bot: GenericBot = new GenericBot(name, { commands, game, trigger });
 bot.client.on("guildMemberAdd", (member: Discord.GuildMember): void => { member.addRole(newMemberDefaultRoleSnowflake).catch(console.error) });
 bot.client.on("message", (message: Discord.Message): void => { onMessage(message).catch(console.error) });
 bot.configure().login().catch(console.error);
