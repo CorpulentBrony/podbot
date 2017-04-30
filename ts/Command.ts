@@ -35,7 +35,7 @@ export class Command implements Command.Like {
 export namespace Command {
 	export import Defaults = CommandDefaults;
 	export import Parser = CommandParser;
-	export const defaults: Set<string> = new Set<string>(Array.of("4chan", "db", "google", "ping", "say", "topic", "uptime"));
+	export const defaults: Set<string> = new Set<string>(Array.of("4chan", "db", "google", "ping", "topic", "uptime"));
 
 	export type TextBasedChannel = Discord.DMChannel | Discord.GroupDMChannel | Discord.TextChannel;
 

@@ -135,7 +135,7 @@ export namespace Defaults {
 		return say(parsedCommand, Array.prototype.reduce.call(parsedCommand.args.toLowerCase(), (result: string, char: string): string => result + (regionalIndicators.has(char) ? regionalIndicators[char] : char), ""));
 	}
 
-	export async function say(parsedCommand: GenericBot.Command.Parser.ParsedCommand, message?: string): Promise<Discord.Message> { return <Promise<Discord.Message>>parsedCommand.channel.send(message ? message : parsedCommand.args); }
+	async function say(parsedCommand: GenericBot.Command.Parser.ParsedCommand, message?: string): Promise<Discord.Message> { return <Promise<Discord.Message>>parsedCommand.channel.send(message ? message : parsedCommand.args); }
 
 	export async function sayEmbed(parsedCommand: GenericBot.Command.Parser.ParsedCommand, options: SayEmbedOptions): Promise<Discord.Message | Array<Discord.Message>> {
 		const embedMessage: RichEmbed = new RichEmbed((options.author) ? options : Object.assign(options, { author: parsedCommand.requester }));

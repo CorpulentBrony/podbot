@@ -21,7 +21,6 @@ commands.set("4chan", { default: true })
 	.set("pfc", { command: (parsedCommand: GenericBot.Command.Parser.ParsedCommand): void => { pfc(parsedCommand).catch(console.error); } })
 	.set("ping", { default: true })
 	.set("regind", { default: true })
-	.set("say", { default: true })
 	.set("topic", { command: (parsedCommand: GenericBot.Command.Parser.ParsedCommand): void => { topic(parsedCommand).catch(console.error); } })
 	.set("uptime", { default: true })
 	.set("yt", { default: true });
@@ -66,12 +65,12 @@ async function onNewVideo(video: YouTube.Response.ItemUrls) {
 	return channels.find("name", "pfc").send(video.videoUrl.toString());
 }
 
-async function pfc(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
+async function pfc(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message | Array<Discord.Message>> {
 	switch (parsedCommand.args.split(" ")[0]) {
 		case "last":
-			return GenericBot.Command.Defaults.say(parsedCommand, channelMonitor.lastVideo.videoUrl.toString());
+			return parsedCommand.channel.send(channelMonitor.lastVideo.videoUrl.toString());
 		case "live":
-			return GenericBot.Command.Defaults.say(parsedCommand, YouTube.Urls.base.setPathname(new Path("/c/PFCpodcast/live")).toString());
+			return parsedCommand.channel.send(YouTube.Urls.base.setPathname(new Path("/c/PFCpodcast/live")).toString());
 	}
 	return undefined;
 }

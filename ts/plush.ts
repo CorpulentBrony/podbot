@@ -12,7 +12,6 @@ commands.set("4chan", { default: true })
 	.set("db", { default: true })
 	.set("dp", { alias: "db" })
 	.set("ping", { default: true })
-	.set("say", { default: true })
 	.set("thread", { command: (parsedCommand: GenericBot.Command.Parser.ParsedCommand): void => { thread(parsedCommand).catch(console.error); } })
 	.set("uptime", { default: true });
 const bot: GenericBot = new GenericBot(name, { commands, trigger });
@@ -31,7 +30,7 @@ async function thread(parsedCommand: GenericBot.Command.Parser.ParsedCommand): P
 		}
 	} catch (e) {
 		if (e instanceof FourChan.FourChanError)
-			return GenericBot.Command.Defaults.say(parsedCommand, e.message);
+			return parsedCommand.channel.send(parsedCommand, e.message);
 		else
 			throw e;
 	}
