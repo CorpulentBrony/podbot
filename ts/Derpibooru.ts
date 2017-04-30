@@ -11,7 +11,7 @@ const API_RANDOM_PATH: string = "/images.json";
 const API_SEARCH_PATH: string = "/search.json";
 const BASE_URL: string = "https://derpibooru.org";
 const FAVICON_PATH: string = "/favicon.ico";
-const FILTER_ID: number = 56027;
+const FILTERS: { nsfw: number, safe: number } = { safe: 100073, nsfw: 56027 };
 
 export class NoponyError extends Error {}
 
@@ -56,16 +56,15 @@ export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpiboo
 	}
 
 	protected configureQuery() {
-		this.query.set("filter_id", Derpibooru.filterId).delete("page");
+		this.query.set("filter_id", this.isNsfw ? Derpibooru.filters.nsfw : Derpibooru.filters.safe).delete("page");
 
 		if (this.type === "search")
-			this.query.set("q", this.makeSafe(this.fixBestPony(this.userInput)));
+			this.query.set("q", this.fixBestPony(this.userInput));
 		else
 			this.query.set("random_image", true);
 	}
 
 	private fixBestPony(query: string): string { return query.replace(/best pony/g, "twilight sparkle"); }
-	private makeSafe(query: string): string { return query.concat(this.isNsfw ? "" : ",safe"); }
 
 	public async search() {
 		let images: Array<Derpibooru.Response.Image>;
@@ -118,7 +117,7 @@ export namespace Derpibooru {
 
 	export class NoponyError extends Error {}
 
-	export const filterId: number = FILTER_ID;
+	export const filters: { nsfw: number, safe: number } = FILTERS;
 
 	namespace Paths {
 		export const favIcon: Path = new Path(FAVICON_PATH);
