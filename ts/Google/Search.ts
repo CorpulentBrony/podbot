@@ -1,3 +1,4 @@
+import * as DiscordTypeChecks from "../DiscordTypeChecks";
 import { Embeddable } from "../Embeddable";
 import { GenericApi } from "../GenericApi";
 import { GenericBot } from "../GenericBot";
@@ -10,7 +11,13 @@ const GOOGLE_SEARCH_API: string = "/customsearch/v1";
 export class Search extends Embeddable<Google.Search.Result.Item> implements Google.Search.Like {
 	private _footer: { text?: string; icon_url?: string; };
 	protected _results: Array<Google.Search.Result.Item> = undefined;
+	private readonly isNsfw: boolean;
 	public searchInformation: Google.Search.Information;
+
+	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand) {
+		super(parsedCommand);
+		this.isNsfw = DiscordTypeChecks.isNsfwChannel(parsedCommand.channel);
+	}
 
 	public get embeds(): Array<Embed.Options> {
 		if (!this.results)
@@ -43,7 +50,7 @@ export class Search extends Embeddable<Google.Search.Result.Item> implements Goo
 
 	protected async configureQuery(query: string) {
 		const secrets: Google.Secrets = await Google.getSecrets();
-		this.query.set("cx", secrets.cx).set("fields", Google.Search.fields).set("key", secrets.key).set("num", 10).set("q", query);
+		this.query.set("cx", secrets.cx).set("fields", Google.Search.fields).set("key", secrets.key).set("num", 10).set("q", query).set("safe", this.isNsfw ? "off" : "high");
 	}
 
 	protected getEmbed(item: Google.Search.Result.Item): Embed.Options {

@@ -64,8 +64,8 @@ export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpiboo
 			this.query.set("random_image", true);
 	}
 
-	protected fixBestPony(query: string): string { return query.replace(/best pony/g, "twilight sparkle"); }
-	protected makeSafe(query: string): string { return query.concat(!this.isNsfw ? ",safe" : ""); }
+	private fixBestPony(query: string): string { return query.replace(/best pony/g, "twilight sparkle"); }
+	private makeSafe(query: string): string { return query.concat(this.isNsfw ? "" : ",safe"); }
 
 	public async search() {
 		let images: Array<Derpibooru.Response.Image>;
