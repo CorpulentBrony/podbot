@@ -23,11 +23,5 @@ export class Image extends Search implements Image.Like {
 }
 
 export namespace Image {
-	export interface Like extends Search.Like {
-		
-	} export declare const Like: {
-		prototype: Like;
-
-		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Like;
-	};
+	export interface Like extends Search.Like {};
 }

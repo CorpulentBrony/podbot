@@ -5,7 +5,7 @@ import { Path } from "./Url";
 import { YouTube } from "./YouTube";
 
 const beaverSnowflake: string = "201717735900708866";
-const game: string = "be the biggest cuck";
+const game: string = "http://iwtcits.com";
 const name: string = "PFCuckBot";
 const newMemberDefaultRoleSnowflake: string = "161186606198423553";
 const selfiesRoleSnowflake: string = "292882948460511238";

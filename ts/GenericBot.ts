@@ -59,7 +59,7 @@ export class GenericBot implements GenericBot.Like {
 		return this;
 	}
 
-	public async clientLogin() {
+	public async clientLogin(): Promise<this> {
 		this.client.login(await this.getToken()).catch(console.error);
 		return this;
 	}
@@ -71,7 +71,7 @@ export class GenericBot implements GenericBot.Like {
 		return secrets.token;
 	}
 
-	public async login() { this.clientLogin(); }
+	public async login() { this.clientLogin().catch(console.error); }
 
 	private onMessage(message: any, sendHandle: Net.Socket | Net.Server): void {
 		if (message && message.ping)

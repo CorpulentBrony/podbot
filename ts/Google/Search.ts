@@ -89,10 +89,6 @@ export namespace Search {
 		searchInformation: Google.Search.Information;
 
 		search(query?: string);
-	} export declare const Like: {
-		prototype: Like;
-
-		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Like;
 	};
 
 	export interface Result {

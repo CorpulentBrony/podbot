@@ -109,10 +109,6 @@ export namespace Derpibooru {
 		readonly type: "random" | "search";
 
 		search();
-	} export declare const Like: {
-		prototype: Like;
-
-		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Like;
 	};
 
 	export class NoponyError extends Error {}

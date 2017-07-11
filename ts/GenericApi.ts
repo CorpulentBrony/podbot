@@ -44,7 +44,7 @@ export class GenericApi {
 
 				if (response.statusCode !== 200)
 					error = new Error("HTTPS request failed.  Status code: " + response.statusCode.toString());
-				else if (!/^application\/json/.test(response.headers["content-type"]))
+				else if (!/^application\/json/.test(<string>response.headers["content-type"]))
 					error = new Error("Invalid content-type for HTTPS request.  Expected application/json but received " + response.headers["content-type"]);
 
 				if (error) {

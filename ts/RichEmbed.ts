@@ -84,10 +84,5 @@ export namespace RichEmbed {
 		send(): Promise<Discord.Message>;
 		set(index: number): this;
 		update(): Promise<Discord.Message>;
-	} export declare const Like: {
-		prototype: Like;
-
-		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand, embeds: Array<RichEmbed.Options>);
-		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand, options?: RichEmbed.Options);
 	};
 }

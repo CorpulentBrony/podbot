@@ -73,10 +73,6 @@ export class YouTube extends Embeddable<YouTube.Response.ItemUrls> implements Yo
 export namespace YouTube {
 	export interface Like extends Embeddable.Like<YouTube.Response.ItemUrls> {
 		search(query?: string);
-	} export declare const Like: {
-		prototype: Like;
-
-		new(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Like;
 	};
 
 	export class Error extends Google.Error {}

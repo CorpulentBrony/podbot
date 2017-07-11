@@ -3,7 +3,7 @@ import * as Discord from "discord.js";
 import * as FourChan from "./FourChan";
 import { GenericBot } from "./GenericBot";
 
-const game: string = "cuddle the plush";
+const game: string = "with plushies";
 const name: string = "PlushieBot";
 const threadMessage: string = "This is my best guess as to where the plush thread is.";
 const trigger: string = "!";

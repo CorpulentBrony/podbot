@@ -2,6 +2,7 @@ import { Buffer } from "buffer";
 import * as Crypto from "crypto";
 import * as Fs from "fs";
 import { Path } from "./Url";
+import { Stream } from "stream";
 
 const algorithm: string = "AES-256-CFB8";
 const secretsDirectory: Path = new Path("/var/www/podbot/");
@@ -58,18 +59,19 @@ export async function getSecrets(target: "Google" | "YouTubeSubscriber" | Bots):
 }
 
 async function getSecretsText(filePath: Path): Promise<string> {
-	const file: Fs.ReadStream = Fs.createReadStream(filePath.toString(), { encoding: "binary", autoClose: true });
-	const decipher: Crypto.Decipher = Crypto.createDecipher(algorithm, await readKey());
-	const pipe: Crypto.Decipher = file.pipe<Crypto.Decipher>(decipher);
-	let resultText: string = "";
-	pipe.on("readable", (): void => {
-		const data: Buffer = <Buffer>pipe.read();
+	return read(filePath);
+	// const file: Fs.ReadStream = Fs.createReadStream(filePath.toString(), { encoding: "binary", autoClose: true });
+	// const decipher: Crypto.Decipher = Crypto.createDecipher(algorithm, await readKey());
+	// const pipe: Crypto.Decipher = file.pipe<Crypto.Decipher>(decipher);
+	// let resultText: string = "";
+	// pipe.on("readable", (): void => {
+	// 	const data: Buffer = <Buffer>pipe.read();
 
-		if (data)
-			resultText += data.toString("utf8");
-	});
-	const result: Promise<string> = new Promise<string>((resolve: (value: string | PromiseLike<string>) => void, reject: (reason?: any) => void): void => { pipe.on("end", (): void => resolve(resultText)); });
-	return result;
+	// 	if (data)
+	// 		resultText += data.toString("utf8");
+	// });
+	// const result: Promise<string> = new Promise<string>((resolve: (value: string | PromiseLike<string>) => void, reject: (reason?: any) => void): void => { pipe.on("end", (): void => resolve(resultText)); });
+	// return result;
 }
 
 async function read(file: Path): Promise<string> {
@@ -87,7 +89,7 @@ export async function readKey(file: Path = keyFile): Promise<string> { return re
 async function readSecretsAll(file: Path = secretsAllFile): Promise<SecretsAll> { return readJson<SecretsAll>(file); }
 
 function write(secret: string, key: string, destination: Path): void {
-	const cipher: Crypto.Cipher = Crypto.createCipher(algorithm, key);
+	const cipher = new Stream.PassThrough(); //: Crypto.Cipher = Crypto.createCipher(algorithm, key);
 	const file: Fs.WriteStream = Fs.createWriteStream(destination.toString(), <any>{ defaultEncoding: "binary", mode: 0o600, autoClose: true });
 	cipher.pipe<Fs.WriteStream>(file).on("finish", (): void => console.log("finished writing file"));
 	cipher.write(secret);
