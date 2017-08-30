@@ -25,9 +25,17 @@ async function thread(parsedCommand: GenericBot.Command.Parser.ParsedCommand): P
 	try {
 		try { result = await FourChan.Catalog.search("plush thread"); }
 		catch (e) {
-			if (e instanceof FourChan.NoThreadError)
-				result = await FourChan.Catalog.search("plush");
-			else
+			if (e instanceof FourChan.NoThreadError) {
+				try { result = await FourChan.Catalog.search("plush"); }
+				catch (e) {
+					if (e instanceof FourChan.NoThreadError) {
+						const message: RichEmbed = new RichEmbed(parsedCommand, { description: e.message, footer: { iconURL: FourChan.favIconUrl.toString() }, title: "Plush Thread Not Found" });
+						parsedCommand.message.delete();
+						return message.send();
+					} else
+					throw e;
+				}
+			} else
 				throw e;
 		}
 	} catch (e) {
