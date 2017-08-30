@@ -19,7 +19,8 @@
   "scripts": {
     "start": "NODE_ENV=production pm2 start index.js --name=\"podbot\"",
     "stop": "pm2 stop \"podbot\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lastSupportedDiscordJs": "c42e53d70d879736dd793eec58a3093d9be36f4a"
   },
   "author": {
     "name": "Corpulent Brony",
@@ -34,7 +35,7 @@
   "dependencies": {
     "@types/node": ">=7.0.14",
     "bufferutil": ">=2.0.1",
-    "discord.js": "github:hydrabolt/discord.js#c42e53d70d879736dd793eec58a3093d9be36f4a",
+    "discord.js": "github:hydrabolt/discord.js#master",
     "erlpack": "github:hammerandchisel/erlpack#master",
     "google-auth-library": ">=0.10.0",
     "googleapis": ">=17.1.0",
@@ -45,6 +46,7 @@
     "pubsubhubbub": ">=0.4.1",
     "sodium": ">=2.0.1",
     "typescript": "next",
-    "typings": ">=2.1.1"
+    "typings": ">=2.1.1",
+    "uws": ">=8.14.1"
   }
 }

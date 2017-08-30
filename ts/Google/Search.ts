@@ -9,7 +9,7 @@ import { Path, Query, Url } from "../Url";
 const GOOGLE_SEARCH_API: string = "/customsearch/v1";
 
 export class Search extends Embeddable<Google.Search.Result.Item> implements Google.Search.Like {
-	private _footer: { text?: string; icon_url?: string; };
+	private _footer: Embed.Options.Footer;
 	protected _results: Array<Google.Search.Result.Item> = undefined;
 	private readonly isNsfw: boolean;
 	public searchInformation: Google.Search.Information;
@@ -25,7 +25,7 @@ export class Search extends Embeddable<Google.Search.Result.Item> implements Goo
 		return super.getEmbeds((item: Google.Search.Result.Item): Embed.Options => this.getEmbed(item));
 	}
 
-	protected get footer(): { text?: string; icon_url?: string; } {
+	protected get footer(): Embed.Options.Footer {
 		if (this._footer)
 			return this._footer;
 		let [prefix, suffix]: [string, string] = ["Results ", ""];
@@ -37,7 +37,7 @@ export class Search extends Embeddable<Google.Search.Result.Item> implements Goo
 			if (this.searchInformation.formattedSearchTime)
 				suffix = " in " + this.searchInformation.formattedSearchTime + " seconds";
 		}
-		return this._footer = { icon_url: Google.Urls.favIcon.toString(), text: prefix + "for query: \"" + this.userInput + "\"" + suffix };
+		return this._footer = { iconURL: Google.Urls.favIcon.toString(), text: prefix + "for query: \"" + this.userInput + "\"" + suffix };
 	}
 
 	public get results(): Array<Google.Search.Result.Item> { return this._results; }

@@ -11,12 +11,12 @@ export class Reactor implements Reactor.Like {
 
 	constructor(bot: GenericBot) { [this.bot, this.channels] = [bot, new Collection<string, Channel>()]; }
 
-	public add(embed: RichEmbed): this {
-		const key: string = embed.message.channel.id;
+	public async add(embed: RichEmbed): Promise<this> {
+		const key: string = (await embed.message).channel.id;
 
 		if (!this.channels.has(key))
 			this.channels.set(key, new Channel(key, this));
-		this.channels.get(key).set(embed);
+		await this.channels.get(key).set(embed);
 		Object.defineProperty(this, "bot", { enumerable: false });
 		return this;
 	}
@@ -55,7 +55,7 @@ export class Reactor implements Reactor.Like {
 				await reactions.clear();
 				return reactions.embed.message;
 			case Reactions.emoticons.get("delete"):
-				return reactions.embed.message.delete();
+				return (await reactions.embed.message).delete();
 		}
 		channel.clearReactionDestructor(reaction.message.id);
 		channel.setReactionDestructor(reaction.message.id);
@@ -85,7 +85,7 @@ export namespace Reactor {
 		readonly channels: Collection<string, Channel>;
 		constructor: Constructor;
 
-		add(embed: RichEmbed): this;
+		add(embed: RichEmbed): Promise<this>;
 		onMessageDelete(message: Discord.Message): void;
 		onMessageDeleteBulk(messages: Discord.Collection<string, Discord.Message>): void;
 		onMessageReactionAdd(reaction: Discord.MessageReaction, user?: Discord.User): void;

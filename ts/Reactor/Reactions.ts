@@ -3,6 +3,7 @@ import { Collection } from "../Collection";
 import * as Discord from "discord.js";
 import { RichEmbed } from "../RichEmbed";
 
+// make reactions property a collection of promises, need to modify Channel.set as well and Reactor.add
 export class Reactions implements Reactions.Like {
 	public readonly channel: Channel;
 	public readonly embed: RichEmbed;
@@ -11,21 +12,21 @@ export class Reactions implements Reactions.Like {
 	public timer: NodeJS.Timer;
 
 	constructor(embed: RichEmbed, channel: Channel) {
-		[this.channel, this.embed, this.enabled] = [channel, embed, false];
-		Object.defineProperty(this, "channel", { enumerable: false });
+		[this.embed, this.enabled] = [embed, false];
+		Object.defineProperty(this, "channel", { value: channel });
 	}
 
 	public async add() {
 		this.reactions = new Collection<string, Discord.MessageReaction>();
 
 		for (const emoticon of Reactions.emoticons)
-			this.reactions.set(emoticon.key, await this.embed.message.react(emoticon.value));
+			this.reactions.set(emoticon.key, await (await this.embed.message).react(emoticon.value));
 		this.enabled = true;
 	}
 
 	public async clear() {
 		this.enabled = false;
-		this.embed.message.clearReactions();
+		(await this.embed.message).clearReactions();
 	}
 
 	public clearDestruct(): void { this.channel.reactor.bot.client.clearTimeout(this.timer); }

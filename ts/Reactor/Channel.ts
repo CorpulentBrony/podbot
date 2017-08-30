@@ -30,9 +30,9 @@ export class Channel implements Channel.Like {
 		await this.reactions.delete(key);
 	}
 
-	public set(embed: RichEmbed): this {
-		const key: string = embed.message.id;
-		this.reactions.set(key, new Reactions(embed, this)).get(key).add().catch(console.error);
+	public async set(embed: RichEmbed): Promise<this> {
+		const key: string = (await embed.message).id;
+		await this.reactions.set(key, new Reactions(embed, this)).get(key).add();
 		this.setReactionDestructor(key);
 		return this;
 	}
@@ -57,7 +57,7 @@ export namespace Channel {
 		delete(messageId: string): boolean;
 		get(messageId: string): Reactions;
 		has(messageId: string): boolean;
-		set(embed: RichEmbed): this;
+		set(embed: RichEmbed): Promise<this>;
 		setReactionDestructor(key: string): void;
 	}
 }

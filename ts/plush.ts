@@ -2,6 +2,7 @@ import * as console from "console";
 import * as Discord from "discord.js";
 import * as FourChan from "./FourChan";
 import { GenericBot } from "./GenericBot";
+import { RichEmbed } from "./RichEmbed";
 
 const game: string = "with plushies";
 const name: string = "PlushieBot";
@@ -36,16 +37,14 @@ async function thread(parsedCommand: GenericBot.Command.Parser.ParsedCommand): P
 			throw e;
 	}
 	const threadUrl: string = FourChan.formatThreadUrl(result);
-	const message: GenericBot.Command.Defaults.RichEmbed = new GenericBot.Command.Defaults.RichEmbed({
-		author: parsedCommand.requester, 
-		footer: "Replies: " + result.replies.toString() + " | Images: " + result.images.toString() + " | Page: " + result.pageNumber.toString(),
-		footerImageUrl: FourChan.favIconUrl.toString(),
+	const message: RichEmbed = new RichEmbed(parsedCommand, {
+		footer: { iconURL: FourChan.favIconUrl.toString(), text: "Replies: " + result.replies.toString() + " | Images: " + result.images.toString() + " | Page: " + result.pageNumber.toString() },
 		title: "Plush Thread",
 		url: threadUrl
 	});
 	message.addField(threadUrl, threadMessage, false);
 
-	try { message.setThumbnail(await FourChan.Thread.randomImage(result)); }
+	try { message.thumbnail = { url: await FourChan.Thread.randomImage(result) }; }
 	catch (e) {
 		if (e instanceof FourChan.Thread.Error)
 			delete message.thumbnail;
@@ -53,5 +52,5 @@ async function thread(parsedCommand: GenericBot.Command.Parser.ParsedCommand): P
 			throw e;
 	}
 	parsedCommand.message.delete();
-	return parsedCommand.channel.send(undefined, { embed: message, split: true });
+	return message.send();
 }

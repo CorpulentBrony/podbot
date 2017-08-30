@@ -32,7 +32,7 @@ export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpiboo
 		return super.getEmbeds((image: Derpibooru.Image): Embed.Options => {
 			return {
 				description: image.file_name + " uploaded by " + image.uploader,
-				footer: { icon_url: Derpibooru.Urls.favIcon.toString(), text: image.tags },
+				footer: { iconURL: Derpibooru.Urls.favIcon.toString(), text: image.tags },
 				image: { url: image.imageUrl.toString() },
 				title: image.pageUrl.toString(),
 				url: image.pageUrl.toString()

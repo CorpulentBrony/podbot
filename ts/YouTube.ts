@@ -28,7 +28,7 @@ export class YouTube extends Embeddable<YouTube.Response.ItemUrls> implements Yo
 				const prev: string = ((videos[index - 1] && videos[index - 1].snippet && videos[index - 1].snippet.title) ? "<<  " + videos[index - 1].snippet.title : "");
 				return {
 					description: video.snippet.description ? video.snippet.description : "",
-					footer: { icon_url: YouTube.Urls.favicon.toString(), text: (next.length > 0 && prev.length > 0) ? prev + "  |  " + next : prev + next },
+					footer: { iconURL: YouTube.Urls.favicon.toString(), text: (next.length > 0 && prev.length > 0) ? prev + "  |  " + next : prev + next },
 					image: { url: video.thumbnailUrl.toString() },
 					title: (video.snippet.title ? video.snippet.title : "") + (video.snippet.channelTitle ? "\n" + video.snippet.channelTitle : ""),
 					url: video.videoUrl.toString(),

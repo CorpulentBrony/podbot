@@ -6,7 +6,7 @@ import * as FourChan from "../FourChan";
 import { GenericBot } from "../GenericBot";
 import { Google } from "../Google";
 import { Query } from "../Url";
-import { RichEmbed as NewRichEmbed } from "../RichEmbed";
+import { RichEmbed } from "../RichEmbed";
 import { YouTube } from "../YouTube";
 
 export class Defaults {
@@ -23,29 +23,13 @@ export namespace Defaults {
 		author?: Discord.User;
 		color?: number;
 		description?: string;
-		fields?: Array<{ name: string; value: string; inline?: boolean; }>;
+		fields?: Array<RichEmbed.Options.Field>;
 		footer?: string;
 		footerImageUrl?: string;
 		image?: string;
 		thumbnail?: { url: string };
 		title: string; 
 		url?: string; 
-	}
-
-	export class RichEmbed extends Discord.RichEmbed {
-		constructor({ author, color = 0x673888, description, fields, footer, footerImageUrl, image, thumbnail, title, url }: SayEmbedOptions) {
-			super({
-				author: { icon_url: author.avatarURL, name: author.username }, 
-				color,
-				description,
-				fields,
-				footer: { icon_url: footerImageUrl, text: footer },
-				image: { url: image },
-				thumbnail,
-				title, 
-				url
-			});
-		}
 	}
 
 	export async function db(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
@@ -58,8 +42,8 @@ export namespace Defaults {
 			else
 				throw err;
 		}
-		const embed: NewRichEmbed = await command.send();
-		parsedCommand.bot.reactor.add(embed);
+		const embed: RichEmbed = await command.send();
+		await parsedCommand.bot.reactor.add(embed);
 		return embed.message;
 	}
 
@@ -76,17 +60,15 @@ export namespace Defaults {
 		}
 		const threadSubject: string = FourChan.formatThreadSubject(result);
 		const threadUrl: string = FourChan.formatThreadUrl(result);
-		const message: RichEmbed = new RichEmbed({
-			author: parsedCommand.requester, 
-			footer: "Replies: " + result.replies.toString() + " | Images: " + result.images.toString() + " | Page: " + result.pageNumber.toString(),
-			footerImageUrl: FourChan.favIconUrl.toString(),
+		const message: RichEmbed = new RichEmbed(parsedCommand, {
+			footer: { iconURL: FourChan.favIconUrl.toString(), text: "Replies: " + result.replies.toString() + " | Images: " + result.images.toString() + " | Page: " + result.pageNumber.toString() },
 			title: ((threadSubject === "") ? "[UNTITLED]" : threadSubject),
 			url: threadUrl
 		});
 		const comment: string = FourChan.formatPostComment(result);
 		message.addField("by " + result.name, (comment.length > 1024) ? comment.slice(0, 1024).concat("\u{2026}") : comment, false);
-		message.setThumbnail(FourChan.formatPostImage(result));
-		return parsedCommand.channel.send(undefined, { embed: message, split: true });
+		message.thumbnail = { url: FourChan.formatPostImage(result) };
+		return message.send();
 	}
 
 	export async function google(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message> {
@@ -99,8 +81,8 @@ export namespace Defaults {
 			else
 				throw err;
 		}
-		const embed: NewRichEmbed = await command.send();
-		parsedCommand.bot.reactor.add(embed);
+		const embed: RichEmbed = await command.send();
+		await parsedCommand.bot.reactor.add(embed);
 		return embed.message;
 	}
 
@@ -114,8 +96,8 @@ export namespace Defaults {
 			else
 				throw err;
 		}
-		const embed: NewRichEmbed = await command.send();
-		parsedCommand.bot.reactor.add(embed);
+		const embed: RichEmbed = await command.send();
+		await parsedCommand.bot.reactor.add(embed);
 		return embed.message;
 	}
 
@@ -138,8 +120,9 @@ export namespace Defaults {
 	async function say(parsedCommand: GenericBot.Command.Parser.ParsedCommand, message?: string): Promise<Discord.Message> { return <Promise<Discord.Message>>parsedCommand.channel.send(message ? message : parsedCommand.args); }
 
 	export async function sayEmbed(parsedCommand: GenericBot.Command.Parser.ParsedCommand, options: SayEmbedOptions): Promise<Discord.Message | Array<Discord.Message>> {
-		const embedMessage: RichEmbed = new RichEmbed((options.author) ? options : Object.assign(options, { author: parsedCommand.requester }));
-		return parsedCommand.channel.send(undefined, { embed: embedMessage, split: true });
+		delete options.author;
+		const embedMessage: RichEmbed = new RichEmbed(parsedCommand, Object.assign(options, { footer: { iconURL: options.footerImageUrl, text: options.footer }, image: { url: options.image } }));
+		return embedMessage.send();
 	}
 
 	export async function uptime(parsedCommand: GenericBot.Command.Parser.ParsedCommand): Promise<Discord.Message | Array<Discord.Message>> {
@@ -164,8 +147,8 @@ export namespace Defaults {
 			else
 				throw err;
 		}
-		const embed: NewRichEmbed = await command.send();
-		parsedCommand.bot.reactor.add(embed);
+		const embed: RichEmbed = await command.send();
+		await parsedCommand.bot.reactor.add(embed);
 		return embed.message;
 	}
 }
