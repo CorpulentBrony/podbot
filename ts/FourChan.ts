@@ -7,7 +7,7 @@ import * as Random from "./Random";
 
 const board: string = "mlp";
 const delaySeconds: number = 60;
-export const favIconUrl: Url = new Url("http://s.4cdn.org/image/favicon-ws.ico");
+export const favIconUrl: Url = new Url("http://s.4cdn.org/image/apple-touch-icon-iphone-retina.png");
 const parentUrl: Url = new Url("https://a.4cdn.org/" + board + "/");
 
 export class FourChanError extends Error {}

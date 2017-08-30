@@ -3,7 +3,7 @@ import { Path, Url } from "./Url";
 
 const GOOGLE_API_BASE_URL: string = "https://www.googleapis.com";
 const GOOGLE_BASE_URL: string = "https://www.google.com";
-const GOOGLE_FAVICON_PATH: string = "/images/branding/product/ico/googleg_lodp.ico";
+const GOOGLE_FAVICON_PATH: string = "/images/branding/googleg/1x/googleg_standard_color_128dp.png";
 const GOOGLE_MAPS_API_BASE_URL: string = "https://maps.googleapis.com";
 const GOOGLE_SEARCH_PATH: string = "/search";
 

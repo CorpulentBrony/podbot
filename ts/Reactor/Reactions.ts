@@ -3,7 +3,6 @@ import { Collection } from "../Collection";
 import * as Discord from "discord.js";
 import { RichEmbed } from "../RichEmbed";
 
-// make reactions property a collection of promises, need to modify Channel.set as well and Reactor.add
 export class Reactions implements Reactions.Like {
 	public readonly channel: Channel;
 	public readonly embed: RichEmbed;

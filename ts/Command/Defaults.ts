@@ -20,7 +20,6 @@ export namespace Defaults {
 		.set(" ", "  ").set("1", ":one: ").set("2", ":two: ").set("3", ":three: ").set("4", ":four: ").set("5", ":five: ").set("6", ":six: ").set("7", ":seven: ").set("8", ":eight: ").set("9", ":nine: ");
 
 	export interface SayEmbedOptions {
-		author?: Discord.User;
 		color?: number;
 		description?: string;
 		fields?: Array<RichEmbed.Options.Field>;
@@ -120,7 +119,6 @@ export namespace Defaults {
 	async function say(parsedCommand: GenericBot.Command.Parser.ParsedCommand, message?: string): Promise<Discord.Message> { return <Promise<Discord.Message>>parsedCommand.channel.send(message ? message : parsedCommand.args); }
 
 	export async function sayEmbed(parsedCommand: GenericBot.Command.Parser.ParsedCommand, options: SayEmbedOptions): Promise<Discord.Message | Array<Discord.Message>> {
-		delete options.author;
 		const embedMessage: RichEmbed = new RichEmbed(parsedCommand, Object.assign(options, { footer: { iconURL: options.footerImageUrl, text: options.footer }, image: { url: options.image } }));
 		return embedMessage.send();
 	}

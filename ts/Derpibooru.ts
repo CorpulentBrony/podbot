@@ -10,7 +10,7 @@ import * as Random from "./Random";
 const API_RANDOM_PATH: string = "/images.json";
 const API_SEARCH_PATH: string = "/search.json";
 const BASE_URL: string = "https://derpibooru.org";
-const FAVICON_PATH: string = "/favicon.ico";
+const FAVICON_URL: string = "https://derpicdn.net/img/2017/6/14/1461521/thumb.png";
 const FILTERS: { nsfw: number, safe: number } = { safe: 100073, nsfw: 56027 };
 
 export class NoponyError extends Error {}
@@ -70,6 +70,11 @@ export class Derpibooru extends Embeddable<Derpibooru.Image> implements Derpiboo
 		let images: Array<Derpibooru.Response.Image>;
 		this.configureQuery();
 
+		if (this.query.has("q") && Number.isInteger(Number.parseInt(this.query.get("q").toString()))) {
+			this.results = Array.of<Derpibooru.Response.Image>(await GenericApi.Get.json<Derpibooru.Response.Image>(Derpibooru.Urls.base.setPathname(new Path(`/${this.query.get("q")}.json`))));
+			return;
+		}
+
 		if (this.type === "random") {
 			const response: Derpibooru.Response.Random = await GenericApi.Get.json<Derpibooru.Response.Random>(Derpibooru.Urls.random, this.query);
 			images = response.images;
@@ -116,7 +121,6 @@ export namespace Derpibooru {
 	export const filters: { nsfw: number, safe: number } = FILTERS;
 
 	namespace Paths {
-		export const favIcon: Path = new Path(FAVICON_PATH);
 		export const random: Path = new Path(API_RANDOM_PATH);
 		export const search: Path = new Path(API_SEARCH_PATH);
 	}
@@ -144,7 +148,7 @@ export namespace Derpibooru {
 
 	export namespace Urls {
 		export const base: Url = new Url(BASE_URL);
-		export const favIcon: Url = base.setPathname(Paths.favIcon);
+		export const favIcon: Url = new Url(FAVICON_URL);
 		export const random: Url = base.setPathname(Paths.random);
 		export const search: Url = base.setPathname(Paths.search);
 	}

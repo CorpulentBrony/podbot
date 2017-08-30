@@ -2,7 +2,6 @@ import * as Decorators from "./Decorators";
 import * as Discord from "discord.js";
 import { GenericBot } from "./GenericBot";
 
-// for some reason, RichEmbed is deprecated from Discord so I need to re-build this class basically to retain the lost functionality
 export class RichEmbed implements RichEmbed.Options {
 	public author?: RichEmbed.Options.Author;
 	public readonly channel: GenericBot.Command.TextBasedChannel;
@@ -25,7 +24,7 @@ export class RichEmbed implements RichEmbed.Options {
 
 	private static getDefaultOptions(parsedCommand: GenericBot.Command.Parser.ParsedCommand): RichEmbed.Options {
 		return {
-			author: { iconURL: parsedCommand.requester.avatarURL, name: parsedCommand.requester.username },
+			author: { iconURL: (<any>parsedCommand.requester.avatarURL)(), name: parsedCommand.requester.username },
 			color: RichEmbed.defaultColor,
 			description: parsedCommand.args,
 			title: parsedCommand.command

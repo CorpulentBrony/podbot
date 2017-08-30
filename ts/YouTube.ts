@@ -81,7 +81,7 @@ export namespace YouTube {
 		export const apiBase: Path = new Path(YOUTUBE_API_BASE_PATH);
 		export const api: Path = apiBase.join(YOUTUBE_API_SEARCH_PATH);
 		export const channel: Path = new Path("/channel/");
-		export const favicon: Path = new Path("/favicon.ico");
+		export const favicon: Path = new Path("/yts/img/ringo/img/favicon_48-vflVjB_Qk.png");
 		export const watch: Path = new Path("/watch");
 	}
 
