@@ -26,7 +26,10 @@ export class Reactions implements Reactions.Like {
 
 	public async clear() {
 		this.enabled = false;
-		(await this.embed.message).clearReactions();
+
+		for (const reaction of this.reactions)
+			reaction.value.remove();
+		//(await this.embed.message).clearReactions();
 	}
 
 	public clearDestruct(): void { this.channel.reactor.bot.client.clearTimeout(this.timer); }
