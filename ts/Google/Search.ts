@@ -16,7 +16,7 @@ export class Search extends Embeddable<Google.Search.Result.Item> implements Goo
 
 	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand) {
 		super(parsedCommand);
-		this.isNsfw = DiscordTypeChecks.isNsfwChannel(parsedCommand.channel);
+		this.isNsfw = true; // DiscordTypeChecks.isNsfwChannel(parsedCommand.channel);
 	}
 
 	public get embeds(): Array<Embed.Options> {

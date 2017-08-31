@@ -16,7 +16,7 @@ export class YouTube extends Embeddable<YouTube.Response.ItemUrls> implements Yo
 
 	constructor(parsedCommand: GenericBot.Command.Parser.ParsedCommand) {
 		super(parsedCommand);
-		this.isNsfw = DiscordTypeChecks.isNsfwChannel(parsedCommand.channel);
+		this.isNsfw = true; // DiscordTypeChecks.isNsfwChannel(parsedCommand.channel);
 	}
 
 	public get embeds(): Array<Embed.Options> {
